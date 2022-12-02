@@ -58,10 +58,9 @@ class RockPaperScissors:
             lose = score[0]
             gameResult = game[1] - game[0]
             gameResultSign = [-1, 0, 1]
-            loseWin = [lose, draw, win]
+            loseWin = [lose, draw, win] if ruleset == 1 else [draw, win, lose]
             winningPlay = game[0] + gameResultSign[game[1]]
             winningPlay = winningPlay % 3 if winningPlay == 3 else winningPlay
-            loseWin = [draw, win, lose]
             roundScore = loseWin[game[1]] + [1, 2, 3][winningPlay] if ruleset == 1 else loseWin[gameResult] + game[1] + 1 
             
             return roundScore
@@ -78,24 +77,24 @@ class RockPaperScissors:
             self.results.append(rules(game))
         return self
     
-    def play2(self):
+    # def play2(self):
         
-        test_rules = lambda gRound: [0, 3, 6][gRound[1] - gRound[0]] + gRound[1]
-        # The one-liner above and the function below should be equivalent
-        def rules(game):
-            score = [0, 3, 6]
-            win = score[2]
-            draw = score[1]
-            lose = score[0]
-            gameResult = game[1] - game[0]
-            gameResultSign = [-1, 0, 1]
-            loseWin = [lose, draw, win]
-            winningPlay = game[0] + gameResultSign[game[1]]
-            winningPlay = winningPlay % 3 if winningPlay == 3 else winningPlay
-            # print(game[1], game[0], winningPlay, "points: ", loseWin[game[1]], "+", [1, 2, 3][winningPlay])
-            roundScore = loseWin[game[1]] + [1, 2, 3][winningPlay]
+    #     test_rules = lambda gRound: [0, 3, 6][gRound[1] - gRound[0]] + gRound[1]
+    #     # The one-liner above and the function below should be equivalent
+    #     def rules(game):
+    #         score = [0, 3, 6]
+    #         win = score[2]
+    #         draw = score[1]
+    #         lose = score[0]
+    #         gameResult = game[1] - game[0]
+    #         gameResultSign = [-1, 0, 1]
+    #         loseWin = [lose, draw, win]
+    #         winningPlay = game[0] + gameResultSign[game[1]]
+    #         winningPlay = winningPlay % 3 if winningPlay == 3 else winningPlay
+    #         # print(game[1], game[0], winningPlay, "points: ", loseWin[game[1]], "+", [1, 2, 3][winningPlay])
+    #         roundScore = loseWin[game[1]] + [1, 2, 3][winningPlay]
             
-            return roundScore
+    #         return roundScore
             
         self.translated()
         minValGame = ord("A")
@@ -118,10 +117,9 @@ def run():
     playGames = RockPaperScissors()
     # print(playGames.secondP)
     # print(playGames.translated().games())
-    print(playGames.reset().play().total_score())
     print(playGames.reset().play().total_score().score)
-    print(max(playGames.reset().play2().total_score().results))
-    print(playGames.reset().play2().total_score().score)
+    print(playGames.reset().play(1).total_score().score)
+
     # print(playGames.secondP)
     # print(playGames.secondP)
 
