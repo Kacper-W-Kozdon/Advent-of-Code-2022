@@ -30,6 +30,7 @@ class Rucksacks:
         self.items = [chr(ord("a") + uni) for uni in range(26)] + [chr(ord("A") + uni) for uni in range(26)]
         self.listDict = {}
         self.suspiciousItems = []
+        self.log = []
         pass
     
     def loader(self):
@@ -49,11 +50,13 @@ class Rucksacks:
     
     def recheck_rucksacks(self):
         self.suspiciousItems = []
+        self.log = []
         for compartmentIdx, compartments in enumerate(self.load):
             appended = False
             for item1 in compartments[0]:       
                 for item2 in compartments[1]:
                     if item1 == item2 and not appended:
+                        self.log.append(["Compartment" + str(compartmentIdx), compartments, "item: ", item1, self.listDict[item1]])
                         # print("Compartment" + str(compartmentIdx), compartments, "item: ", item1, self.listDict[item1])
                         self.suspiciousItems.append(item1)
                         appended = True
@@ -72,6 +75,7 @@ def run():
     elfBps = Rucksacks()
     print(elfBps.loader().make_list().recheck_rucksacks().translate_to_priorities().suspiciousItems)
     sumOfSusItems = sum(elfBps.loader().make_list().recheck_rucksacks().translate_to_priorities().suspiciousItems)
+    # print(elfBps.log)
     return sumOfSusItems
 
 print(run())
