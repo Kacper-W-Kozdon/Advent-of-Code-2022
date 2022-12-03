@@ -57,14 +57,33 @@ class Rucksacks:
                 for item2 in compartments[1]:
                     if item1 == item2 and not appended:
                         self.log.append(["Compartment" + str(compartmentIdx), compartments, "item: ", item1, self.listDict[item1]])
-                        # print("Compartment" + str(compartmentIdx), compartments, "item: ", item1, self.listDict[item1])
                         self.suspiciousItems.append(item1)
                         appended = True
-                        # print("appended: ", appended)
-                    
-            
-                        
+
         return self
+    
+    def authenticate(self):
+        self.suspiciousItems = []
+        self.log = []
+        group = []
+        groupFull = False
+        for bpIndex, backpack in enumerate(self.load):            
+            badgeFound = False
+            group.append(backpack[0] + backpack[1])
+            if len(group) == 3:
+                groupFull = True                
+                self.log.append(["groupNo: ", bpIndex//3, "groupFull: ", groupFull, "group members: ", [group[0], group[1], [group[2]]]])
+                for item in group[0]:                    
+                    if not badgeFound:                        
+                        if item in group[1] and item in group[2]:
+                            badgeFound = True
+                            self.log.append(["badge found: ", badgeFound, "badge: ", item])
+                            self.suspiciousItems.append(item)                                         
+                            groupFull = False
+                            group = []                                        
+            
+        return self
+    
     
     def translate_to_priorities(self):
         for (index, item) in enumerate(self.suspiciousItems):
@@ -76,6 +95,9 @@ def run():
     print(elfBps.loader().make_list().recheck_rucksacks().translate_to_priorities().suspiciousItems)
     sumOfSusItems = sum(elfBps.loader().make_list().recheck_rucksacks().translate_to_priorities().suspiciousItems)
     # print(elfBps.log)
-    return sumOfSusItems
+    print(elfBps.loader().make_list().authenticate().translate_to_priorities().suspiciousItems)
+    sumOfBadges = sum(elfBps.loader().make_list().authenticate().translate_to_priorities().suspiciousItems)
+    # print(elfBps.log)
+    return sumOfSusItems, sumOfBadges
 
 print(run())
