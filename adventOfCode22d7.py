@@ -27,6 +27,9 @@ class Device:
         self.cd = ""
         self.currentPaths = []
         self.maxPathLen = 0
+        self.maxFolderSize = 100000
+        self.totalPaths = 0
+        self.bigFolders = []
         
     def __update_paths(self):
         while len(self.currentPaths) > 0:
@@ -34,6 +37,7 @@ class Device:
         for path in self.paths:
             if all(list(map(lambda element: element in path, self.tape))):
                 self.currentPaths.append(path)
+        # print(self.currentPaths) if len(self.currentPaths) > 1 else 0
         return self
         
     def __cd(self):
@@ -43,21 +47,30 @@ class Device:
         else:
             self.tape.append(self.cd)
             self.__update_paths()
+        # print(self.tape) if len(self.tape) != len(set(self.tape)) else 0
         return self
             
     def __ls(self):
-        if len(self.currentPaths) == 1:  
+        # print(self.currentPaths) if len(self.currentPaths) > 1 else 0
+        if len(self.currentPaths) >= 0:  
             # print("\n", len(self.lsContent), "\n")
-            self.paths.pop(self.paths.index(self.currentPaths[0]))
+            # print(self.currentPaths)
+
             for item in self.lsContent:
-                path = self.currentPaths[0].copy()
+                print("Found: ", item) if item[1] == "nnrd.zrj" else 0
+                path = self.tape.copy()
+                # print(path) if item[1] == "nnrd.zrj" else 0
                 try:
                     path.append((int(item[0]), item[1]))
+                    # print(item)
                 except ValueError:
                     path.append(item[1])
-                                
+                    # print(item)
+                # print(path) if item[1] == "nnrd.zrj" else 0                
                 self.paths.append(path)
+                # print(path in self.paths) if item[1] == "nnrd.zrj" else 0 
             pass
+            
         return self
     
     def __remove_duplicates(self):
@@ -87,25 +100,86 @@ class Device:
                             break
                             # print(item)
                     self.__ls()
-                    self.lsContent = []
-                            
+                    print(self.lsContent) if (len(self.lsContent) == 1 and 'nnrd.zrj' in self.lsContent[0]) else 0
+                    
+                    print(['/', 'fhhwv', 'jngvpc', 'jbc', 'htczftcn', 'nflgvsgz', (208092, 'nnrd.zrj')] in self.paths) if (len(self.lsContent) == 1 and 'nnrd.zrj' in self.lsContent[0]) else 0 
+                    self.lsContent = []        
             else:
                 pass
             pass
         self.__remove_duplicates()
+        self.totalPaths = len(self.paths)
         return self
     
     def size_check(self):
         self.maxPathLen = max(list(map(lambda path: len(path), self.paths)))
+        for depth in range(0, self.maxPathLen):
+            temporaryPaths = []
+            setOfFolders = []
+            for path in self.paths:
+                if len(path) > depth:
+                    setOfFolders.append(path[depth]) if type(path[depth]) != tuple else 0
+                    temporaryPaths.append(path[depth:]) if type(path[depth]) != tuple else 0
+            setOfFolders = set(setOfFolders)
+
+            # print(setOfFolders, depth)
+            # print(temporaryPaths, "\n") if depth == 11 else 0
+            for folder in setOfFolders:
+                folderSize = 0
+                for path in temporaryPaths:
+                    if type(path[-1]) == tuple and path[0] == folder:
+                        folderSize += path[-1][0]
+                self.bigFolders.append((folderSize, folder))
+        bigFolders = sorted(self.bigFolders.copy(), key = lambda folder: folder[0])
+        # print(bigFolders)
+        for folder in bigFolders:
+            if folder[0] >= self.maxFolderSize:
+                self.bigFolders.pop(self.bigFolders.index(folder))
+        
         return self
     
 def run():
     device = Device()
     paths = device.create_tree().size_check().paths
     # print(paths)
+    size = 0
+    numberFiles = 0
+    files0 = []
+    for path in device.paths:
+        # print(path[-1]) if type(path[-1]) == tuple else 0
+        size += path[-1][0] if type(path[-1]) == tuple else 0
+        numberFiles += 1 if type(path[-1]) == tuple else 0
+        files0.append((int(path[-1][0]), path[-1][1])) if type(path[-1]) == tuple else 0
+    print(size, numberFiles)
+    # print(files0)
+    files = []
+    numberFiles = 0
+    size = 0
+    for line in device.terminal:
+        try:
+            int(line[0])
+            numberFiles += 1
+            size += int(line[0])
+            files.append((int(line[0]), line[1]))
+        except ValueError:
+            pass
+    numberFiles = len(set(files))
+    print(size, numberFiles)
     print("max: ", device.maxPathLen)
+    for file in files:
+        print("Missing file: ", file) if file not in set(files0) else 0
+    # print(device.bigFolders)
+    solution = 0
+    for folder in device.bigFolders:
+        solution += folder[0]
     # for path in paths:
         # print(path) if "bgzdv" in path else 0
+    for path in device.paths:
+        if (303757, 'gglsqjbz.ffb') in path:
+            print("AYE")
+            print(path)
+            print("\n")
+    return solution
     
 print(run())
 
@@ -115,6 +189,6 @@ print(run())
 
 print(list(map(lambda x: x in [1, 2, 3, 4], [1, 2, 3])))
     
-a = [1, 2, 3, 5]
-print(a[2:])
+a = [(1, "a"), (3, "b")]
+
 
