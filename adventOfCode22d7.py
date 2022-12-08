@@ -118,40 +118,51 @@ class Device:
             setOfFolders = []
             for path in self.paths:
                 if len(path) > depth:
-                    setOfFolders.append(path[depth]) if type(path[depth]) != tuple else 0
-                    temporaryPaths.append(path[depth:]) if type(path[depth]) != tuple else 0
+                    # print(tuple(path[:depth + 1]))
+                    setOfFolders.append(tuple(path[:depth + 1])) if type(path[depth]) != tuple else 0
+                    temporaryPaths.append(path) if type(path[depth]) != tuple else 0
             setOfFolders = set(setOfFolders)
+            
 
             # print(setOfFolders, depth)
             # print(temporaryPaths, "\n") if depth == 11 else 0
             for folder in setOfFolders:
                 folderSize = 0
+                # print("FOLDER: ", folder)
                 for path in temporaryPaths:
-                    if type(path[-1]) == tuple and path[0] == folder:
+                    if type(path[-1]) == tuple and tuple(path[:depth + 1]) == folder:
                         folderSize += path[-1][0]
-                self.bigFolders.append((folderSize, folder))
+                self.bigFolders.append((folderSize, folder[-1]))
         bigFolders = sorted(self.bigFolders.copy(), key = lambda folder: folder[0])
+        # print("BIG FOLDERS: ")
         # print(bigFolders)
-        for folder in bigFolders:
-            if folder[0] >= self.maxFolderSize:
-                self.bigFolders.pop(self.bigFolders.index(folder))
+        # print("\n\n\n")
+        # for folder in bigFolders:
+        #     if folder[0] > self.maxFolderSize:
+        #         self.bigFolders.pop(self.bigFolders.index(folder))
+        bigFolders = []
+        for folder in self.bigFolders:
+            if folder[0] <= self.maxFolderSize:
+                bigFolders.append(folder)
+        self.bigFolders = bigFolders
         
         return self
     
 def run():
     device = Device()
     paths = device.create_tree().size_check().paths
+    # print(device.bigFolders)
     # print(paths)
-    size = 0
-    numberFiles = 0
-    files0 = []
-    for path in device.paths:
-        # print(path[-1]) if type(path[-1]) == tuple else 0
-        size += path[-1][0] if type(path[-1]) == tuple else 0
-        numberFiles += 1 if type(path[-1]) == tuple else 0
-        files0.append((int(path[-1][0]), path[-1][1])) if type(path[-1]) == tuple else 0
-    print(size, numberFiles)
-    # print(files0)
+    # size = 0
+    # numberFiles = 0
+    # files0 = []
+    # for path in device.paths:
+    #     # print(path[-1]) if type(path[-1]) == tuple else 0
+    #     size += path[-1][0] if type(path[-1]) == tuple else 0
+    #     numberFiles += 1 if type(path[-1]) == tuple else 0
+    #     files0.append((int(path[-1][0]), path[-1][1])) if type(path[-1]) == tuple else 0
+    # print(size, numberFiles)
+    # # print(files0)
     files = []
     numberFiles = 0
     size = 0
@@ -165,10 +176,10 @@ def run():
             pass
     numberFiles = len(set(files))
     print(size, numberFiles)
-    print("max: ", device.maxPathLen)
-    for file in files:
-        print("Missing file: ", file) if file not in set(files0) else 0
-    # print(device.bigFolders)
+    # print("max: ", device.maxPathLen)
+    # for file in files:
+    #     print("Missing file: ", file) if file not in set(files0) else 0
+    # # print(device.bigFolders)
     solution = 0
     for folder in device.bigFolders:
         solution += folder[0]
