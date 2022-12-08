@@ -111,7 +111,7 @@ class Device:
         self.totalPaths = len(self.paths)
         return self
     
-    def size_check(self):
+    def size_check(self, mod = 1):
         self.maxPathLen = max(list(map(lambda path: len(path), self.paths)))
         for depth in range(0, self.maxPathLen):
             temporaryPaths = []
@@ -140,12 +140,22 @@ class Device:
         # for folder in bigFolders:
         #     if folder[0] > self.maxFolderSize:
         #         self.bigFolders.pop(self.bigFolders.index(folder))
-        bigFolders = []
-        for folder in self.bigFolders:
-            if folder[0] <= self.maxFolderSize:
-                bigFolders.append(folder)
-        self.bigFolders = bigFolders
         
+        if mod == 1:
+            bigFolders = []
+            for folder in self.bigFolders:
+                if folder[0] <= self.maxFolderSize:
+                    bigFolders.append(folder)
+                self.bigFolders = bigFolders
+        if mod != 1:
+            folderToDel = []
+            maxTakenSpace = 70000000 - 30000000
+            takenSpace = max(bigFolders, key = lambda folder: folder[0])[0]
+            toFreeUp = takenSpace - maxTakenSpace
+            for folder in bigFolders:
+                if folder[0] > toFreeUp and len(folderToDel) == 0:
+                    folderToDel.append(folder)
+            self.bigFolders = folderToDel
         return self
     
 def run():
@@ -190,11 +200,15 @@ def run():
             print("AYE")
             print(path)
             print("\n")
-    return solution
+    device2 = Device()
+    solution2 = device2.create_tree().size_check(0).bigFolders
+    return solution, solution2
     
 print(run())
 
-
+# x = [4, 2, 3, 1]
+# a = sorted(x)
+# print(x, a)
 
 
 
