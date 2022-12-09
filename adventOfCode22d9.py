@@ -62,9 +62,10 @@ class Rope():
         return (maxVertical * 2, maxHorizontal * 2)
     
     def __update_board(self, tail):
-        updater = np.zeros(self.board.shape)
-        updater[tail[0], tail[1]] = 1
-        self.board += updater
+        # updater = np.zeros(self.board.shape)
+        # updater[tail[0], tail[1]] = 1
+        # self.board += updater
+        self.board[tail[0], tail[1]] += 1
         # print(self.board[tail[0], tail[1]])
         # print("BOARD UPDATE: ", self.board[tail])
         # print(sum(self.board > 0))
@@ -75,7 +76,7 @@ class Rope():
         self.board = np.zeros(self.__find_board_sizes())        
         return self
     
-    def simulate_rope(self):
+    def simulate_rope(self, ropeLen = 2):
         
         def tail_step(head, tail):
             step = [0, 0]
@@ -84,9 +85,12 @@ class Rope():
             step = [0, 0] if condition else [sign(head[0] - tail[0]), sign(head[1] - tail[1])]
             return step
         
-        head = self.startingPosition
-        tail = self.startingPosition
+        
+        rope = [self.startingPosition for i in range(ropeLen)]
+        head = rope[0]
+        tail = rope[-1]
         print("TAIL: ", tail)
+        print("ROPE LEN: ", len(rope))
         for motion in self.motions:
             instruction = [motion[1] if motion[0] in ["U", "D"] else 0, motion[1] if motion[0] in ["L", "R"] else 0, ]
             if motion[0] == "L":
@@ -96,19 +100,40 @@ class Rope():
             
             # print(instruction)
             while instruction != [0, 0]:
-                head = [head[0] + sign(instruction[0]), head[1] + sign(instruction[1])]
+            #     if mode == "segment":
+            #         head = [head[0] + sign(instruction[0]), head[1] + sign(instruction[1])]
+            #         instruction = [instruction[0] - sign(instruction[0]) * 1, instruction[1] - sign(instruction[1]) * 1, ]
+            #         step = tail_step(head, tail)
+            #         tail = [tail[0] + step[0], tail[1] + step[1]]
+            #         # print("STEP", head, tail)
+            #         self.__update_board(tail)
+                # if mode == "rope":
+                    
+                for segIdx in range(len(rope) - 1):
+                    head = rope[segIdx]
+                    tail = rope[segIdx + 1]
+                    if segIdx == 0:
+                        head = [head[0] + sign(instruction[0]), head[1] + sign(instruction[1])]
+                    
+                    step = tail_step(head, tail)
+                    tail = [tail[0] + step[0], tail[1] + step[1]]
+                    # print("STEP", head, tail)
+                    # print(segIdx, segIdx + 1, len(rope) - 1)
+                    if segIdx + 1 == len(rope) - 1:
+                        # print("BOARD UPDATE")
+                        self.__update_board(tail)
+                    rope[segIdx] = head
+                    rope[segIdx + 1] = tail
                 instruction = [instruction[0] - sign(instruction[0]) * 1, instruction[1] - sign(instruction[1]) * 1, ]
-                step = tail_step(head, tail)
-                tail = [tail[0] + step[0], tail[1] + step[1]]
-                # print("STEP", head, tail)
-                self.__update_board(tail)
+                    # print(rope)
         return self
     
 def run():
+    ropeLen = 10
     ropeBridge = Rope()
-    ropeBridge.create_board().simulate_rope()
+    ropeBridge.create_board().simulate_rope(ropeLen)
     
-    print(ropeBridge.board)
+    # print(ropeBridge.board)
     noVisitedPlaces = sum((ropeBridge.board > 0).astype(int))
     return noVisitedPlaces
 
@@ -118,5 +143,5 @@ print(run())
 #     return (3, 3)
 # a = np.ones(fun())
 # print(a)
-a = 5
-print(sign(a))
+# a = 5
+# print(sign(a))
