@@ -10,7 +10,7 @@ import numpy as np
 
 def load_files():
     fContent = []
-    with open("inputtest.txt") as f:
+    with open("input11.txt") as f:
         
         for (lineIndex, line) in enumerate(f):  #loading the file into an np.array
             if bool(line):
@@ -116,6 +116,7 @@ class Shenanigans:
         
         def worry_lvl(inspectedItem, operation, rounds):
             # print(inspectedItem, operation)
+            worryLvl = 0
             worryLvl = inspectedItem
             # print(worryLvl)
             # print(worryLvl)
@@ -123,14 +124,14 @@ class Shenanigans:
             # print(operation[1], operation[2])
             if operation[0] == "+":
                 # print("add")
-                worryLvl = (worryLvl if operation[1] == "old" else int(operation[1])) + (worryLvl if operation[2] == "old" else int(operation[2]))
+                worryLvl = int(worryLvl if operation[1] == "old" else int(operation[1])) + int(worryLvl if operation[2] == "old" else int(operation[2]))
             if operation[0] == "*":
                 # print("multiply")
                 # num1 = (worryLvl if operation[1] == "old" else int(operation[1]))
                 # num2 = (worryLvl if operation[2] == "old" else int(operation[2]))
                 # worryLvl = num1 * num2
-                worryLvl = np.multiply((worryLvl if operation[1] == "old" else int(operation[1])), (worryLvl if operation[2] == "old" else int(operation[2])))
-                # worryLvl = (worryLvl if operation[1] == "old" else int(operation[1])) * (worryLvl if operation[2] == "old" else int(operation[2]))
+                # worryLvl = np.multiply((worryLvl if operation[1] == "old" else int(operation[1])), (worryLvl if operation[2] == "old" else int(operation[2])))
+                worryLvl = int(worryLvl if operation[1] == "old" else int(operation[1])) * int(worryLvl if operation[2] == "old" else int(operation[2]))
             # print(worryLvl) if worryLvl > 0 else 0
             # print(rounds)
             if rounds == 20:
@@ -210,8 +211,7 @@ class Shenanigans:
                 # print(divisible) if divisible == True else 0
             # print(type(number))
             
-            # if divisible == True:
-                # worryLvl = copy // number
+        
             
             return divisible
             
@@ -228,11 +228,12 @@ class Shenanigans:
                     # print(monkey.items)
                     worryLvl = worry_lvl(inspectedItem, monkey.operation, rounds)
                     
+                    
                     # print(worryLvl) if worryLvl != float("inf") else 0
-                    self.monkeys[int(monkey.test[2])].items.append(worryLvl) if worryLvl % monkey.test[0] else self.monkeys[int(monkey.test[1])].items.append(worryLvl)
+                    # self.monkeys[int(monkey.test[2])].items.append(worryLvl) if worryLvl % monkey.test[0] else self.monkeys[int(monkey.test[1])].items.append(worryLvl)
                     # print(roundsIdx, len(str(worryLvl))) if roundsIdx > 300 else 0
                     # print(monkey.number, monkey.test) if len(str(worryLvl)) > 10000 else 0
-                    # self.monkeys[int(monkey.test[2])].items.append(worryLvl) if not divisibility_rules(worryLvl, monkey.test[0]) else self.monkeys[int(monkey.test[1])].items.append(worryLvl)
+                    self.monkeys[int(monkey.test[2])].items.append(worryLvl) if not divisibility_rules(worryLvl, monkey.test[0]) else self.monkeys[int(monkey.test[1])].items.append(worryLvl)
 
                     del worryLvl
         self.__monkey_business()                                        
@@ -242,7 +243,7 @@ class Shenanigans:
 
 def run():
     monkeys = Shenanigans()
-    print(monkeys.prepare_monkeys().rnd(20).monkeyBusiness)
+    print(monkeys.prepare_monkeys().rnd(10000).monkeyBusiness)
 
 print(run())
 # x = [1, 2, 3]
