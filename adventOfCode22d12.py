@@ -12,7 +12,7 @@ import functools as ft
 
 def load_files():
     fContent = []
-    with open("inputtest.txt") as f:
+    with open("input12.txt") as f:
         
         for (lineIndex, line) in enumerate(f):  #loading the file into an np.array
             if bool(line):
@@ -39,7 +39,7 @@ class Map():
         self.pathLimit = self.longestWalkL
         self.relH = np.zeros(self.map.shape, dtype = object)
         self.walks = []
-        self.deadEnds = []
+        self.deadEnds = list([])
         self.shortest = 0
         self.visited = set([])
         
@@ -172,14 +172,23 @@ class Map():
         while 0 in directions:
             directions.pop(directions.index(0))
         for direction in directions:
+            # print(tuple(direction) in list(self.visited))
+            # print(tuple(direction), direction)
             if tuple(direction) in list(self.visited):
-                directions.pop(directions.index(direction))
-        
+                directions.pop(directions.index(list(direction)))
+                
         if len(directions) == 0:
+            # print(self.walks[-1])
+            # print(type(self.deadEnds))
+            # print(self.deadEnds)
             self.deadEnds.append(self.walks.pop())  
         else:
+            direction = directions[0]
             self.walks += [directions[0]]
-            self.visited = set(list(self.visited) + [tuple(directions[0])])
+            self.visited = list(self.visited)
+            self.visited.append(tuple(direction))
+            self.visited = set(self.visited)
+            # print(self.visited)
         return self
         
     def choose_path2(self):
@@ -187,6 +196,7 @@ class Map():
         self.__set_start_stop()
         self.__rel_heights()
         self.__find_ent_ex()
+        self.deadEnds = []
         rd.seed()
         
         
@@ -196,8 +206,8 @@ class Map():
         self.walks = [start]
         while finish not in self.walks:
             self.__step()
-            print(len(self.walks))
-            print(self.walks)
+            # print(len(self.walks))
+            # print(self.walks)
         self.shortest = len(self.walks) - 1 if finish in self.walks else 0
         lastL = self.longestWalkL
         print()
