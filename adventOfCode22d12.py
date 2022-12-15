@@ -42,6 +42,7 @@ class Map():
         self.deadEnds = list([])
         self.shortest = 0
         self.visited = set([])
+        self.shortestW = []
         
     
 
@@ -106,7 +107,7 @@ class Map():
         finish = [self.startStop[1][0][0], self.startStop[1][1][0]]
         print(heights[start[0], start[1]])
         self.walks = [[start]]
-        print(self.walks)
+        # print(self.walks)
         finished = False
         while not finished:
             print(len(self.walks))
@@ -159,8 +160,9 @@ class Map():
    
     def __step(self):    
 
-        heights = self.relH             
-    
+        heights = self.relH          
+        start = [self.startStop[0][0][0], self.startStop[0][1][0]]
+        finish = [self.startStop[1][0][0], self.startStop[1][1][0]]
         oldCoords = self.walks[-1]
         step = [[0, 1], [1, 0], [0, -1], [-1, 0]]
         
@@ -177,39 +179,72 @@ class Map():
             if tuple(direction) in list(self.visited):
                 directions.pop(directions.index(list(direction)))
                 
-        if len(directions) == 0:
+        if len(directions) == 0 and self.walks[-1] != start:
             # print(self.walks[-1])
             # print(type(self.deadEnds))
             # print(self.deadEnds)
             self.deadEnds.append(self.walks.pop())  
-        else:
-            direction = directions[0]
-            self.walks += [directions[0]]
+        elif len(directions) != 0:
+            direction = rd.choice(directions)
+            self.walks += [direction]
             self.visited = list(self.visited)
             self.visited.append(tuple(direction))
             self.visited = set(self.visited)
             # print(self.visited)
+        else:
+            pass
         return self
+     
+    def __optim(self):
+        start = [self.startStop[0][0][0], self.startStop[0][1][0]]
+        finish = [self.startStop[1][0][0], self.startStop[1][1][0]]
+        goal = (start[0] + finish[0])/2
+        for stepIdx, step in self.shortestW:
+            if step[0] > goal:
+                self.shortestW[stepIdx] = [step[0] - 1, step[1]]
+            if step[0] < goal:
+                self.shortestW[stepIdx] = [step[0] - 1, step[1]]
+            self.shortestW = set(self.shortestW)
+            self.shortestW = list(self.shortestW)
         
+        return self
+    
     def choose_path2(self):
         #Need to add something to avoid the path looping around.
         self.__set_start_stop()
         self.__rel_heights()
         self.__find_ent_ex()
         self.deadEnds = []
+        start = [self.startStop[0][0][0], self.startStop[0][1][0]]
         rd.seed()
+        lastL = self.longestWalkL
+        lastWalkL = self.longestWalkL
         
         
         
         start = [self.startStop[0][0][0], self.startStop[0][1][0]]
         finish = [self.startStop[1][0][0], self.startStop[1][1][0]]
-        self.walks = [start]
-        while finish not in self.walks:
-            self.__step()
-            # print(len(self.walks))
-            # print(self.walks)
-        self.shortest = len(self.walks) - 1 if finish in self.walks else 0
-        lastL = self.longestWalkL
+        for i in range(10000):
+            # print(i)
+            attrition = 0
+            self.walks = [start]
+            while finish not in self.walks:
+                self.__step()
+                if len(self.walks) == lastWalkL:
+                    attrition += 1
+                if attrition == 5:
+                    break
+                lastWalkL = len(self.walks)
+                # print(len(self.walks))
+                # print(self.walks)
+            self.shortest = len(self.walks) - 1 if finish in self.walks else -1
+            if self.shortest < lastL and self.shortest != -1:
+                self.shortestW = self.walks
+                lastL = self.shortest
+        print(self.shortestW[-1], finish)        
+        self.shortest = lastL
+        
+        self.__optim()
         print()
         return self
             
@@ -242,7 +277,7 @@ print(run())
 # def fun(x):
 #     return x if x%2 else -x
 # print(fun(2), fun(3))
-a = [1, 2, 3]
-b = [4]
-b.append(a.pop())
-print(a, b)
+# a = [1, 2, 3]
+# b = [4]
+# b.append(a.pop())
+# print(a, b)
