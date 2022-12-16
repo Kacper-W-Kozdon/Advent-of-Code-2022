@@ -12,7 +12,7 @@ import functools as ft
 
 def load_files():
     fContent = []
-    with open("inputtest.txt") as f:
+    with open("input12.txt") as f:
         
         for (lineIndex, line) in enumerate(f):  #loading the file into an np.array
             if bool(line):
@@ -44,6 +44,7 @@ class Map():
         self.visited = set([])
         self.shortestW = []
         self.shortestWDirs = []
+        self.stepsData = np.zeros(self.map.shape)
         
     
 
@@ -58,10 +59,10 @@ class Map():
         self.map[self.startStop[0]] = "a"
         self.map[self.startStop[1]] = "z"
         self.pathLimit = ord("z") + 1 - ord("a")
-        print(self.map.shape)
-        print(len([inf for i in range((self.map.shape[0] + 2) * (self.map.shape[1] + 2))]))
+        # print(self.map.shape)
+        # print(len([inf for i in range((self.map.shape[0] + 2) * (self.map.shape[1] + 2))]))
         
-        self.mapWBorders = np.array([float(inf) for i in range((self.map.shape[0] + 2) * (self.map.shape[1] + 2))]).reshape((self.map.shape[0] + 2, -1))
+        self.mapWBorders = np.array([1000 for i in range((self.map.shape[0] + 2) * (self.map.shape[1] + 2))]).reshape((self.map.shape[0] + 2, -1))
         
         self.map = np.array([ord(height) for height in self.map.flatten()]).reshape(self.map.shape)
         
@@ -71,8 +72,8 @@ class Map():
         return self
     
     def __rel_heights(self):
-        print(self.map)
-        print(self.mapWBorders[1 : -1,  : -2])
+        # print(self.map)
+        # print(self.mapWBorders[1 : -1,  : -2])
         l = self.map - self.mapWBorders[1 : -1,  : -2]
         r = self.map - self.mapWBorders[1 : -1, 2 : ]
         u = self.map - self.mapWBorders[ : -2, 1 : -1]
@@ -95,288 +96,43 @@ class Map():
         
         return self
      
-    def choose_path(self):
-        #Need to add something to avoid the path looping around.
-        self.__set_start_stop()
-        self.__rel_heights()
-        self.__find_ent_ex()
-        
-        
-        heights = self.relH
-        
-        start = [self.startStop[0][0][0], self.startStop[0][1][0]]
-        finish = [self.startStop[1][0][0], self.startStop[1][1][0]]
-        print(heights[start[0], start[1]])
-        self.walks = [[start]]
-        # print(self.walks)
-        finished = False
-        while not finished:
-            print(len(self.walks))
-            
-            copyWalks = self.walks.copy()
-            # print(copyWalks)
-            for walk in copyWalks:
-                # finished = True if finish in walk else 0
-                if len(walk) < self.longestWalkL:
-                    coords = walk[-1]
-                    
-                    r = [walk[-1][0], walk[-1][1] + 1] if [walk[-1][0], walk[-1][1] + 1] not in walk and heights[coords[0], coords[1]][0] >= -1 else 0
-                    d = [walk[-1][0] + 1, walk[-1][1]] if [walk[-1][0] + 1, walk[-1][1]] not in walk and heights[coords[0], coords[1]][1] >= -1 else 0
-                    l = [walk[-1][0], walk[-1][1] - 1] if [walk[-1][0], walk[-1][1] - 1] not in walk and heights[coords[0], coords[1]][2] >= -1 else 0
-                    u = [walk[-1][0] - 1, walk[-1][1]] if [walk[-1][0] - 1, walk[-1][1]] not in walk and heights[coords[0], coords[1]][3] >= -1 else 0
-                directions = [r, d, l, u]
-                # print(directions)
-                # print(directions)
-                while 0 in directions:
-                    
-                    directions.pop(directions.index(0))
-                    # print("dirs0:", directions)
-            # print("dirs:", directions)
-            # print(len(directions))
-            # print(len(directions) > 0)
-            # print(len(directions) > 0)
-            # if len(directions) > 0:
-                if len(directions) == 0:
-                    self.walks.pop(self.walks.index(walk))
-                else:
-                    walk = self.walks.pop(self.walks.index(walk))
-                # print(walk)
-                # print(directions)
-                # print(self.walks)
-                    
-                    
-                    for direction in directions:
-                        
-                        # print(direction)
-                        walk.append(direction)
-                        # print(walk)
-                        self.walks += [walk]
-                        walk = walk[ : -1]
-                        if direction == finish:
-                            # print("MIN: ", min(self.walks, key = lambda walk: len(walk)))
-                            finished = True
-                            # print(finished)
-        
-        self.shortest = len(min(self.walks, key = lambda walk: len(walk))) - 1  
-   
-    def __step(self):    
-
-        heights = self.relH          
-        start = [self.startStop[0][0][0], self.startStop[0][1][0]]
-        finish = [self.startStop[1][0][0], self.startStop[1][1][0]]
-        oldCoords = self.walks[-1]
-        step = [[0, 1], [1, 0], [0, -1], [-1, 0]]
-        
-        r = [self.walks[-1][0], self.walks[-1][1] + 1] if [self.walks[-1][0], self.walks[-1][1] + 1] not in self.deadEnds and [self.walks[-1][0], self.walks[-1][1] + 1] not in self.walks and heights[oldCoords[0], oldCoords[1]][0] >= -1 else 0
-        d = [self.walks[-1][0] + 1, self.walks[-1][1]] if [self.walks[-1][0] + 1, self.walks[-1][1]] not in self.deadEnds and [self.walks[-1][0] + 1, self.walks[-1][1]] not in self.walks and heights[oldCoords[0], oldCoords[1]][1] >= -1 else 0
-        l = [self.walks[-1][0], self.walks[-1][1] - 1] if [self.walks[-1][0], self.walks[-1][1] - 1] not in self.deadEnds and [self.walks[-1][0], self.walks[-1][1] - 1] not in self.walks and heights[oldCoords[0], oldCoords[1]][2] >= -1 else 0
-        u = [self.walks[-1][0] - 1, self.walks[-1][1]] if [self.walks[-1][0] - 1, self.walks[-1][1]] not in self.deadEnds and [self.walks[-1][0] - 1, self.walks[-1][1]] not in self.walks and heights[oldCoords[0], oldCoords[1]][3] >= -1 else 0
-        directions = [r, d, l, u] 
-        while 0 in directions:
-            directions.pop(directions.index(0))
-        for direction in directions:
-            # print(tuple(direction) in list(self.visited))
-            # print(tuple(direction), direction)
-            if tuple(direction) in list(self.visited):
-                directions.pop(directions.index(list(direction)))
-                
-        if len(directions) == 0 and self.walks[-1] != start:
-            # print(self.walks[-1])
-            # print(type(self.deadEnds))
-            # print(self.deadEnds)
-            self.deadEnds.append(self.walks.pop())  
-        elif len(directions) != 0:
-            direction = rd.choice(directions)
-            self.walks += [direction]
-            self.visited = list(self.visited)
-            self.visited.append(tuple(direction))
-            self.visited = set(self.visited)
-            # print(self.visited)
-        else:
-            pass
-        return self
-     
-    def __optim(self):
-        start = [self.startStop[0][0][0], self.startStop[0][1][0]]
-        finish = [self.startStop[1][0][0], self.startStop[1][1][0]]
-        self.shortestWDirs = []
-        for stepIdx in range(1, len(self.shortestW)):
-            self.shortestWDirs.append([self.shortestW[stepIdx][0] - self.shortestW[stepIdx - 1][0], self.shortestW[stepIdx][1] - self.shortestW[stepIdx - 1][1]])
-        oldL = len(self.shortestWDirs) + 1
-        
-        
-        
-        def walk_the_path(testPath):
-            finish = [self.startStop[1][0][0], self.startStop[1][1][0]]
-            start = [self.startStop[0][0][0], self.startStop[0][1][0]]
-            state = True
-            for step in testPath:
-                end = [start[0] + step[0], start[1] + step[1]]
-                print("END", end)
-                condition = True if self.map[end[0], end[1]] - self.map[start[0], start[1]] <= 1 else False
-                # print(self.map[end[0], end[1]], self.map[start[0], start[1]], condition)
-                if not condition:
-                    
-                    state = False
-                    # print(state)
-                    break
-                start = end
-            
-            if end != finish:
-                print("END", end, finish)
-                state = False
-            return state
-        
-        
-        testPath = self.shortestWDirs
-        print(all(testPath[-1] == testPath[-2]))
-        
-        # print(testPath)
-        condMet = False
-        while oldL != len(testPath):
-            # print(oldL, len(testPath))
-            testStep1Idx = 0
-            testStep2Idx = 0
-            testStep1 = np.array([])
-            testStep2 = np.array([])
-            
-            found = False
-            
-            newPathState = True
-            # print(len(testPath))
-            
-            for stepIdx, step in enumerate(testPath):
-                # print(stepIdx)
-                if not stepIdx < len(testPath):
-                    break
-                if stepIdx > 0 and stepIdx < len(testPath) - 1 and not condMet:
-                    # print(step != testPath[stepIdx - 1])
-                    # print(testStep2Idx == testStep1Idx)
-                    if any(step != testPath[stepIdx - 1]) and testStep2Idx == testStep1Idx and not condMet and not found:
-                        
-                        testStep1Idx = stepIdx
-                        testStep1 = np.array(testPath[stepIdx - 1])
-                        testStep2 = testStep1
-                        testStep2Idx = testStep1Idx
-                        found = True
-                        condMet = False
-                    # print(all(step != testPath[stepIdx - 1]) and found and not condMet)
-                    # print(step, testPath[stepIdx - 1])
-                    if any(step != testPath[stepIdx - 1]) and found and not condMet:
-                        testStep2 = np.array(step)
-                        testStep2Idx = stepIdx
-                        # print(testStep1, testStep2)
-                        # print("COND", [testStep2[0], testStep2[1]] == [-testStep1[0], -testStep1[1]])
-                        if [testStep2[0], testStep2[1]] == [-testStep1[0], -testStep1[1]]:
-                            # print(testStep1, testStep2)
-                            condMet = True
-                            # oldL = len(testPath)  
-                            # found = False
-                            # break
-                            safety = testPath
-                            
-                            
-                            idxFromStart = testStep1Idx
-                            idxFromEnd = -(len(testPath) - testStep2Idx) - 1
-                            while condMet:
-                               print(len(testPath))
-                               if not newPathState:
-                                   print(oldL != len(testPath), oldL, len(testPath))
-                                   condMet = False
-                                   testStep1 = testStep2.copy()
-                                   testStep1Idx = testStep2Idx
-                                   # print("BREAK")
-                                   break
-                                   # print(len(testPath), oldL)
-                                   
-                               testPath = safety
-                               idxFromStart = idxFromStart - 1
-                               idxFromEnd = idxFromEnd + 1
-                                   
-                               
-                               print(idxFromStart, idxFromEnd)
-                               safety = testPath.copy()
-                               safety.pop(idxFromStart)
-                               safety.pop(idxFromEnd)
-                               newPathState = walk_the_path(safety)
-                               if newPathState:
-                                   print("NEW PATH")
-                                   oldL = len(testPath)
-                            
-                            
-                            
-                    
-               
-            
-                        
-                        
-                        
-                        
-                        
-        self.shortestWDirs = testPath
-       
-        self.shortest = len(self.shortestWDirs) 
-        return self
     
-    def choose_path2(self):
+    def find_path_lee(self):
         #Need to add something to avoid the path looping around.
         self.__set_start_stop()
         self.__rel_heights()
         self.__find_ent_ex()
         self.deadEnds = []
-        start = [self.startStop[0][0][0], self.startStop[0][1][0]]
-        rd.seed()
-        lastL = self.longestWalkL
-        lastWalkL = self.longestWalkL
-        
-        
-        
+        self.stepsData = np.zeros(self.map.shape)
         start = [self.startStop[0][0][0], self.startStop[0][1][0]]
         finish = [self.startStop[1][0][0], self.startStop[1][1][0]]
-        for i in range(5000):
-            # print(i)
-            attrition = 0
-            self.walks = [start]
-            while finish not in self.walks:
-                self.__step()
-                if len(self.walks) == lastWalkL:
-                    attrition += 1
-                if attrition == 5:
-                    break
-                lastWalkL = len(self.walks)
-                # print(len(self.walks))
-                # print(self.walks)
-            self.shortest = len(self.walks) - 1 if finish in self.walks else -1
-            if self.shortest < lastL and self.shortest != -1:
-                self.shortestW = self.walks
-                lastL = self.shortest
-        
-        print(self.shortestW[-1], finish)        
-        self.shortest = lastL
-        
-        self.__optim()
-        print()
-        return self
-    
-    def __level(self):
-        
-        return self
-    
-    def choose_path3(self):
-        #Need to add something to avoid the path looping around.
-        self.__set_start_stop()
-        self.__rel_heights()
-        self.__find_ent_ex()
-        self.deadEnds = []
-        start = [self.startStop[0][0][0], self.startStop[0][1][0]]
-        rd.seed()
-        lastL = self.longestWalkL
-        lastWalkL = self.longestWalkL
-        
-        
-        
-        start = [self.startStop[0][0][0], self.startStop[0][1][0]]
-        finish = [self.startStop[1][0][0], self.startStop[1][1][0]]
+        self.shortest = 0
+        directions = [[0, 1], [1, 0], [0, -1], [-1, 0]]
+        while self.stepsData[finish[0], finish[1]] == 0:
+            
+            if self.shortest == 0:
+                self.shortest += 1
+                for direction in directions:       
+                    if self.map[direction[0] + start[0] + 1, direction[1] + start[1] + 1] - self.map[start[0], start[1]] <= 1:
+                        self.stepsData[direction[0] + start[0] + 1, direction[1] + start[1] + 1] = self.shortest 
+            
+            currentStepLocRaw = np.where(self.stepsData == self.shortest)
+            currentStep = [location for location in zip(currentStepLocRaw[0], currentStepLocRaw[1])]
+            self.shortest += 1
+            for location in currentStep:
+                for direction in directions:
+                    # print([direction[0] + location[0], direction[1] + location[1]])
+                    locCond = (direction[0] + location[0]) in range(self.map.shape[0]) and (direction[1] + location[1]) in range(self.map.shape[1])
+                    if locCond:
+                        valCond = self.map[direction[0] + location[0], direction[1] + location[1]] - self.map[location[0], location[1]] <= 1
+                        notVisitedCond = self.stepsData[direction[0] + location[0], direction[1] + location[1]] == 0
+                    else:
+                        valCond = False
+                        notVisitedCond = False
+                    # print(locCond, valCond, notVisitedCond)
+                    
+                    if valCond and notVisitedCond and locCond:
+                        self.stepsData[direction[0] + location[0], direction[1] + location[1]] = self.shortest
             
         return self    
         
@@ -385,8 +141,7 @@ class Map():
 
 def run():
     maps = Map()
-    maps.choose_path2()
-    print("shortest: ", maps.shortest)
+    maps.find_path_lee()
     return maps.shortest
 
 print(run())
@@ -411,7 +166,9 @@ print(run())
 # b = [4]
 # b.append(a.pop())
 # print(a, b)
-a = [1, 2, 3]
+# a = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
 # b = a.copy()
 # a.pop()
 # print(b)
+# b = np.where(a > 4)
+# print([a[i] for i in zip(b[0], b[1])])
