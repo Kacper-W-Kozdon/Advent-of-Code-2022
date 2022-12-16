@@ -45,6 +45,7 @@ class Map():
         self.shortestW = []
         self.shortestWDirs = []
         self.stepsData = np.zeros(self.map.shape)
+        self.shortestList = []
         
     
 
@@ -97,14 +98,15 @@ class Map():
         return self
      
     
-    def find_path_lee(self):
+    def find_path_lee(self, startIn = 0):
         #Need to add something to avoid the path looping around.
-        self.__set_start_stop()
-        self.__rel_heights()
-        self.__find_ent_ex()
+        self.__set_start_stop() if not startIn else 0
+        self.__rel_heights() if not startIn else 0
+        self.__find_ent_ex() if not startIn else 0
         self.deadEnds = []
         self.stepsData = np.zeros(self.map.shape)
-        start = [self.startStop[0][0][0], self.startStop[0][1][0]]
+        start = [self.startStop[0][0][0], self.startStop[0][1][0]] if not startIn else startIn
+        # print(start)
         finish = [self.startStop[1][0][0], self.startStop[1][1][0]]
         self.shortest = 0
         directions = [[0, 1], [1, 0], [0, -1], [-1, 0]]
@@ -112,12 +114,24 @@ class Map():
             
             if self.shortest == 0:
                 self.shortest += 1
-                for direction in directions:       
-                    if self.map[direction[0] + start[0] + 1, direction[1] + start[1] + 1] - self.map[start[0], start[1]] <= 1:
-                        self.stepsData[direction[0] + start[0] + 1, direction[1] + start[1] + 1] = self.shortest 
+                for direction in directions:  
+                    location = start
+                    locCond = (direction[0] + location[0]) in range(self.map.shape[0]) and (direction[1] + location[1]) in range(self.map.shape[1])
+                    if locCond:
+                        valCond = self.map[direction[0] + location[0], direction[1] + location[1]] - self.map[location[0], location[1]] <= 1
+                        notVisitedCond = self.stepsData[direction[0] + location[0], direction[1] + location[1]] == 0
+                    else:
+                        valCond = False
+                        notVisitedCond = False
+                    # print(locCond, valCond, notVisitedCond)    
+                    if valCond and notVisitedCond and locCond:
+                        self.stepsData[direction[0] + start[0], direction[1] + start[1]] = self.shortest 
             
             currentStepLocRaw = np.where(self.stepsData == self.shortest)
             currentStep = [location for location in zip(currentStepLocRaw[0], currentStepLocRaw[1])]
+            if currentStep == []:
+                self.shortest = float("inf")
+                break
             self.shortest += 1
             for location in currentStep:
                 for direction in directions:
@@ -134,14 +148,33 @@ class Map():
                     if valCond and notVisitedCond and locCond:
                         self.stepsData[direction[0] + location[0], direction[1] + location[1]] = self.shortest
             
-        return self    
+        return self   
+    
+    def find_path_lee_shortest(self):
+        self.__set_start_stop()
+        self.__rel_heights()
+        self.__find_ent_ex()
+        # print(self.map)
+        startsRaw = np.where(self.map == ord("a"))
+        starts = [[location[0], location[1]] for location in zip(startsRaw[0], startsRaw[1])]
+        # print(starts)
+        # print(len(starts))
+        
+        for startIdx, start in enumerate(starts):
+            # print(startIdx)
+            self.find_path_lee(start)
+            self.shortestList.append(self.shortest)
+            # print(self.shortest)
+        self.shortest = min(self.shortestList)
+        
+        return self
         
 #use a sum and u product for each point with entries/exits in the format [pm1 or 0, pm1 or 0, pm1 or 0, pm1 or 0] for [r, d, l, u] directions.
 #map relative heights in the same manner as line above.
 
 def run():
     maps = Map()
-    maps.find_path_lee()
+    maps.find_path_lee_shortest()
     return maps.shortest
 
 print(run())
