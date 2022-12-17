@@ -33,6 +33,8 @@ class Packets:
         self.packets = {"left": [], "right": []}
         self.order = []
         self.solution1 = 0
+        self.orderedPackets = []
+        self.decoderKey = 0
         
         
     def __extract_packets(self):
@@ -45,10 +47,11 @@ class Packets:
         return self
         
     
-    def analyse_packets(self):
+    def analyse_packets(self, mode = "check"):
         
-        def compare(left, right, order = "keepChecking", depth = 0):
-            
+        def compare(leftC, rightC, order = "keepChecking", depth = 0):
+            left = leftC.copy()
+            right = rightC.copy()
             if order in ["right", "wrong"]:
                 return order
             else:
@@ -100,21 +103,69 @@ class Packets:
             #     print(left, right)
             
             return order
+        if mode == "check":
+            self.__extract_packets()
+            for left, right in zip(self.packets["left"], self.packets["right"]):
+                # print(left, right)
+                leftC = left.copy()
+                rightC = right.copy()
+                self.order.append(compare(leftC, rightC))
+                # print(self.order[-1])
+            # print(np.array(np.array(self.order) == "right").astype(int))
+            self.solution1 = sum([orderIdx + 1 if orderVal != 0 else 0 for orderIdx, orderVal in enumerate(np.array(np.array(self.order) == "right").astype(int))])
         
-        self.__extract_packets()
-        for left, right in zip(self.packets["left"], self.packets["right"]):
-            # print(left, right)
-            self.order.append(compare(left.copy(), right.copy()))
-            # print(self.order[-1])
-        # print(np.array(np.array(self.order) == "right").astype(int))
-        self.solution1 = sum([orderIdx + 1 if orderVal != 0 else 0 for orderIdx, orderVal in enumerate(np.array(np.array(self.order) == "right").astype(int))])
+        if mode == "order":
+            
+            dividerPackets = [[[2]], [[6]]]
+            self.raw.append(dividerPackets[0])
+            self.raw.append(dividerPackets[1])
+            self.orderedPackets = self.raw.copy()
+            
+            self.order.append(False)
+            index = 0
+            while not all(self.order):     
+            # print(self.order)
+                while len(self.order) > 0:                    
+                    self.order.pop()              
+                for packetIdx, packet in enumerate(self.orderedPackets): 
+                    
+                    # # print(packetIdx)
+                    if packetIdx == len(self.orderedPackets) - 1:
+                        break
+                    # # print(packet, self.orderedPackets[packetIdx + 1])
+                    packet1Copy = packet.copy()
+                    packet2Copy = self.orderedPackets[packetIdx + 1].copy()
+                    # print(packet1Copy, packet2Copy)
+                    self.order.append(True if compare(packet1Copy, packet2Copy) == "right" else False)
+                    # print(packet, self.orderedPackets[packetIdx + 1], "\n\n\n")
+                    
+                    if not self.order[-1]:
+                        index = packetIdx
+                        self.orderedPackets.insert(index, self.orderedPackets.pop(index + 1))
+                        # print("After", self.orderedPackets[packetIdx], self.orderedPackets[packetIdx + 1], "\n\n")
+                    #     break
+                
+        self.decoderKey = (self.orderedPackets.index(dividerPackets[0]) + 1) * (self.orderedPackets.index(dividerPackets[1]) + 1)
         return self
         
 def run():
     packets = Packets()
     # print(packets.analyse_packets().order)
-    print(packets.analyse_packets().solution1)
+    print(packets.analyse_packets(mode = "order").decoderKey)
     # for order, packetL, packetR in zip(packets.analyse_packets().order, packets.packets["left"], packets.packets["right"]):
         # print(packetL, "\n", packetR, "\n", order, "\n\n")
     
 print(run())
+
+# a = [1, 2, 3, 4]
+# b = iter(a)
+# print(next(b), next(b))
+# a.insert(-1, a.pop())
+# print(next(b), next(b))
+# while True:
+#     print(next(b))
+
+# a = [1, 2, 3, 4]
+# b = a.copy()
+# b.pop()
+# print(a, b)
