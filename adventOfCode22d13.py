@@ -121,7 +121,7 @@ class Packets:
             self.raw.append(dividerPackets[1])
             self.orderedPackets = self.raw.copy()
             
-            self.order.append(False)
+            self.order = [False]
             index = 0
             while not all(self.order):     
             # print(self.order)
@@ -145,12 +145,12 @@ class Packets:
                         # print("After", self.orderedPackets[packetIdx], self.orderedPackets[packetIdx + 1], "\n\n")
                     #     break
                 
-        self.decoderKey = (self.orderedPackets.index(dividerPackets[0]) + 1) * (self.orderedPackets.index(dividerPackets[1]) + 1)
+                self.decoderKey = (self.orderedPackets.index(dividerPackets[0]) + 1) * (self.orderedPackets.index(dividerPackets[1]) + 1)
         return self
         
 def run():
     packets = Packets()
-    # print(packets.analyse_packets().order)
+    print(packets.analyse_packets().solution1)
     print(packets.analyse_packets(mode = "order").decoderKey)
     # for order, packetL, packetR in zip(packets.analyse_packets().order, packets.packets["left"], packets.packets["right"]):
         # print(packetL, "\n", packetR, "\n", order, "\n\n")
