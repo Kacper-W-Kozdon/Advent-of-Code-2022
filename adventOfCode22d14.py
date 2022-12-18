@@ -31,6 +31,7 @@ class Stone:
         self.maxV = 0
         self.minH = 0
         self.minV = 0
+        self.boardReady = False
         
     def __preprocess__(self):
         self.lines = []
@@ -75,19 +76,21 @@ class Stone:
         return self
     
     def board_ready(self, mode = "void"):
-        self.__preprocess__()
-        self.__prepare_board__()
-        self.__prepare_stones__()
-        self.board[np.where(self.board == 0)] = "."
-        if mode == "noVoid":
-            # print(self.board.shape)
-            for counter in range(2 * self.maxV):
-                self.entry[1] += 1
-                self.board = np.insert(self.board, 0, ".", axis=1)
-                self.board = np.insert(self.board, -1, ".", axis=1)
-            self.board[-1, :] = "#"
-            # print(self.board.shape)
-            # print(self.board[-1, :])
+        if not self.boardReady:
+            self.__preprocess__()
+            self.__prepare_board__()
+            self.__prepare_stones__()
+            self.board[np.where(self.board == 0)] = "."
+            if mode == "noVoid":
+                # print(self.board.shape)
+                for counter in range(2 * self.maxV):
+                    self.entry[1] += 1
+                    self.board = np.insert(self.board, 0, ".", axis=1)
+                    self.board = np.insert(self.board, -1, ".", axis=1)
+                self.board[-1, :] = "#"
+                # print(self.board.shape)
+                # print(self.board[-1, :])
+            self.boardReady = True
         return self
     
 class Sand(Stone):
@@ -142,8 +145,8 @@ class Sand(Stone):
         
     def simulate_sand(self, mode = "void"):
         self.board_ready(mode)
-        if mode == "noVoid":
-            entry = [0, 500 + self.maxH]
+        # if mode == "noVoid":
+            # entry = [0, 500 + self.maxH]
         
         self.grainCounter = 0
         self.limReached = False
@@ -152,7 +155,7 @@ class Sand(Stone):
         
         return self
     
-    def print_sand(self, rangeView = 20):
+    def print_sand(self, rangeView = 40):
         for line in self.board:
             for symbol in line[self.entry[1] - rangeView : self.entry[1] + rangeView]:
                 print(symbol, end = "")
@@ -165,8 +168,9 @@ def run():
     sand = Sand()
     # for line in sand.board_ready().board:
         # print(line[490 : 520])
+    # sand.board_ready(mode = "noVoid").print_sand()
     grainNo = sand.simulate_sand(mode = "noVoid").grainCounter
-    # sand.print_sand()
+    sand.print_sand()
     return grainNo
 print(run())
 
