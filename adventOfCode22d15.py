@@ -5,6 +5,13 @@ Created on Mon Dec 19 15:23:57 2022
 @author: xBubblex
 """
 
+'''
+
+NEED TO ALLOCATE SEPARATE ARRAYS FOR SENSOR + BEACON PAIRS.
+
+'''
+
+
 import re
 import numpy as np
 import random as rd
@@ -12,7 +19,7 @@ import functools as ft
 
 def load_files():
     fContent = []
-    with open("inputtest.txt") as f:
+    with open("input15.txt") as f:
         
         for (lineIndex, line) in enumerate(f):  #loading the file into an np.array
             if bool(line) and line != "\n":
@@ -36,7 +43,7 @@ class Beacons():
     
     def __create_board__(self, shape0 = 0, shape1 = 0):
         
-        self.board = np.zeros((shape0 + self.boardOffset[0] * 2, shape1 + self.boardOffset[1] * 2), dtype = str)
+        self.board = np.empty((shape0 + self.boardOffset[0] * 2, shape1 + self.boardOffset[1] * 2), dtype = str)
         self.board[ : , : ] = "."
         return self
     
