@@ -39,7 +39,9 @@ class Beacons():
         self.boardOffset = offset
         self.preprocessingFinished = False
         self.solution1 = 0
-
+        self.rowListOfHash = []
+        self.beacon = []
+        self.tuningFreq = 4000000
     
     def __create_board__(self, shape0 = 0, shape1 = 0):
         
@@ -158,8 +160,8 @@ class Beacons():
         # print(min(allCoords, key = lambda coords: coords[1])[1] - 1, min(allCoords, key = lambda coords: coords[0])[0] - 1)
         boardShape0 = max(allCoords, key = lambda coords: coords[1])[1] - min(allCoords, key = lambda coords: coords[1])[1] * sign(min(allCoords, key = lambda coords: coords[1])[1]) - 1
         boardShape1 = max(allCoords, key = lambda coords: coords[0])[0] - min(allCoords, key = lambda coords: coords[0])[0] * sign(min(allCoords, key = lambda coords: coords[0])[0]) - 1
-        # print(boardShape0, boardShape1)
-        # print(boardShape0, boardShape1)
+        print(boardShape0, boardShape1)
+        print(boardShape0, boardShape1)
         self.__create_board__(boardShape0, boardShape1)
         # print(self.board.shape)
         self.__board_offset__()
@@ -167,7 +169,7 @@ class Beacons():
         midPointTranslation = [min([0, min(allCoords, key = lambda coords: coords[0])[0]]), min([0, min(allCoords, key = lambda coords: coords[1])[1]])]
         midPointTranslation = [midPointTranslation[0] - self.boardOffset[1], midPointTranslation[1] - self.boardOffset[0]]
         self.translation = [midPointTranslation[1], midPointTranslation[0]]
-        # print("TRANSLATION", self.translation)
+        print("TRANSLATION", self.translation)
         modifiedData = {}
         for key in self.data.keys():
             modifiedData[key] = np.array(self.data[key])
@@ -189,6 +191,138 @@ class Beacons():
                 # self.print_board()
         return self
     
+    
+    
+    
+    def ping_all_short(self, row = 10):
+        
+        #self.data[key][n][0/1] = x/y position of the key for nth + 1 example, 
+        yToCheck = row
+        
+        
+        return self
+    
+    def __count_hash_in_row__(self, row = 10, mode = "count", rangeS = [0, 20]):
+        while len(self.rowListOfHash) > 0:
+            self.rowListOfHash.pop()
+        dataForDistances = zip(self.data["sensors"], self.data["beacons"])        
+        dataForDistancesList = list(dataForDistances)
+        for sAndB in dataForDistancesList:
+            sensorX = sAndB[0][0]
+            sensorY = sAndB[0][1]
+            # print(sensorX)
+            distance = lambda sensorAndBeacon: abs(sensorAndBeacon[0][0] - sensorAndBeacon[1][0]) + abs(sensorAndBeacon[0][1] - sensorAndBeacon[1][1])
+            threshold = sensorY + distance(sAndB) - row if row >= sensorY else row - (sensorY - distance(sAndB))
+            # print(threshold, distance(sAndB), sensorY)
+            if row in range(sensorY, sensorY + distance(sAndB) + 1):
+                numHash = 1 + 2 * (threshold)
+                # print("HASH", numHash)
+                self.rowListOfHash += [colIdx for colIdx in range(sensorX - threshold, sensorX + threshold + 1)]
+            if row in range(sensorY - distance(sAndB), sensorY):
+                numHash = 1 + 2 * (threshold)
+                self.rowListOfHash += [colIdx for colIdx in range(sensorX - threshold, sensorX + threshold + 1)]
+                
+                
+        self.rowListOfHash = list(set(self.rowListOfHash))
+        # print(self.rowListOfHash)
+        
+        if mode == "count":
+            for beacon in self.data["beacons"]:
+                if beacon[1] == row: #and beacon[0] in range(rangeS[0], rangeS[1] + 1):
+                    try:
+                        self.rowListOfHash.pop(self.rowListOfHash.index(beacon[0]))        
+                    except:
+                        pass
+                   
+            for sensor in self.data["sensors"]:
+                if sensor[1] == row: #and sensor[0] in range(rangeS[0], rangeS[1] + 1):
+                    self.rowListOfHash.append(sensor[0])
+        
+        self.rowListOfHash = list(set(self.rowListOfHash))
+        # print(row, self.rowListOfHash)
+        self.solution1 = len(self.rowListOfHash) if (mode == "count" or row == 10) else 0
+        
+        if mode == "find":
+            
+        #     self.rowListOfHash = list(set(self.rowListOfHash))
+                    
+        #     # print(sorted(self.rowListOfHash[self.rowListOfHash.index(rangeS[0]) : self.rowListOfHash[1 + self.rowListOfHash.index(rangeS[1])]]))
+            temprow = []
+            for elem in self.rowListOfHash:
+                if elem in range(rangeS[0], rangeS[1] + 1):
+                    temprow.append(elem)
+            # print(temprow)
+            # self.solution1 = len(self.rowListOfHash)
+            self.rowListOfHash = sorted(list(set(temprow)))
+            self.solution1 = len(self.rowListOfHash)
+        
+        # print(self.solution1, row)
+        
+        return self
+    
+
+    def preprocess_short(self):
+        # 
+        if self.preprocessingFinished == True:
+            return self
+        
+        if self.preprocessingFinished:
+            self.data = {"sensors": [], "beacons": []}
+            self.board = np.array([])
+            self.translation = []
+    
+    
+        for line in self.raw:
+            line = line.split(": ")
+            line = {"sensors": line[0], "beacons": line[1]}
+            for key in self.data.keys():
+                data = []
+                readStart = line[key].index("=") + 1
+                readEnd = line[key].index(",")
+                data.append(int(line[key][readStart : readEnd]))
+                readStart = line[key][readEnd : ].index("=") + readEnd + 1
+                data.append(int(line[key][readStart : ]))
+                self.data[key].append(data)
+        
+        allCoords = []
+        allCoords += self.data["sensors"]
+        allCoords += self.data["beacons"]
+        self.preprocessingFinished = True
+        
+        return self
+    
+    
+    def find_short(self, row = 10, mode = "count", rangeS = [0, 20]):
+        self.preprocess_short()
+        self.__count_hash_in_row__(row, mode, rangeS)
+        return self
+    
+    def find_beacon(self, mode = "find", rangeS = [0, 20]):
+        beaconFound = False
+        self.tuningFreq = 4000000
+        for row in range(rangeS[0], rangeS[1] + 1):
+            if beaconFound:
+                break
+            self.find_short(row, mode, rangeS)
+            # print(self.solution1)
+            
+            
+            # print(sorted(self.rowListOfHash[self.rowListOfHash.index(rangeS[0]) : self.rowListOfHash[1 + self.rowListOfHash.index(rangeS[1])]]))
+            if self.rowListOfHash != [colIdx for colIdx in range(rangeS[0], rangeS[1] + 1)]:
+                # print(self.rowListOfHash, "\n\n", [colIdx for colIdx in range(rangeS[0], rangeS[1] + 1)])
+                beaconFound = True
+            print(row)    
+            if beaconFound:
+                column = [colIdx not in self.rowListOfHash for colIdx in range(rangeS[0], rangeS[1] + 1)].index(True)
+ 
+                self.beacon = [row, column]
+        
+            
+                self.tuningFreq = self.tuningFreq * self.beacon[1] + self.beacon[0]
+        print("TUNING FREQ", self.tuningFreq, "\n", self.beacon)
+        
+        return self
+    
     def find_where_it_isnt(self, row = 10):
         row = row - self.translation[0]
         # print([location in ["#"] for location in self.board[row, : ]])
@@ -207,7 +341,9 @@ class Beacons():
 
 def run():
     beacons = Beacons()
-    beacons.ping_all().find_where_it_isnt().print_board()
+    print("SOLUTION1", beacons.find_short(row = 2000000).solution1)
+    beacons.find_beacon(rangeS = [0, 4000000])
+    # beacons.find_beacon(rangeS = [0, 20])
     
 print(run())
 
