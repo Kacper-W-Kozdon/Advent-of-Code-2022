@@ -203,8 +203,12 @@ class Beacons():
         return self
     
     def __count_hash_in_row__(self, row = 10, mode = "count", rangeS = [0, 20]):
-        while len(self.rowListOfHash) > 0:
-            self.rowListOfHash.pop()
+       
+        #Make one array with indices in rangeS and overwrite said indices with zeros when they are covered by sensors' range. Count zeros in array for a given row for
+        #first part. Find non-zero value in rangeSxrangeS for second part.
+       
+        
+        self.rowListOfHash = np.array([], dtype = int)
         dataForDistances = zip(self.data["sensors"], self.data["beacons"])        
         dataForDistancesList = list(dataForDistances)
         for sAndB in dataForDistancesList:
@@ -217,11 +221,14 @@ class Beacons():
             if row in range(sensorY, sensorY + distance(sAndB) + 1):
                 numHash = 1 + 2 * (threshold)
                 # print("HASH", numHash)
-                self.rowListOfHash += [colIdx for colIdx in range(sensorX - threshold, sensorX + threshold + 1)]
+                # self.rowListOfHash += [colIdx for colIdx in range(sensorX - threshold, sensorX + threshold + 1)]
+                toConcat = [colIdx for colIdx in range(sensorX - threshold, sensorX + threshold + 1)]
+                self.rowListOfHash = np.concatenate((self.rowListOfHash, toConcat))
             if row in range(sensorY - distance(sAndB), sensorY):
                 numHash = 1 + 2 * (threshold)
-                self.rowListOfHash += [colIdx for colIdx in range(sensorX - threshold, sensorX + threshold + 1)]
-                
+                # self.rowListOfHash += [colIdx for colIdx in range(sensorX - threshold, sensorX + threshold + 1)]
+                toConcat = [colIdx for colIdx in range(sensorX - threshold, sensorX + threshold + 1)]
+                self.rowListOfHash = np.concatenate((self.rowListOfHash, toConcat))
                 
         self.rowListOfHash = list(set(self.rowListOfHash))
         # print(self.rowListOfHash)
@@ -238,23 +245,28 @@ class Beacons():
                 if sensor[1] == row: #and sensor[0] in range(rangeS[0], rangeS[1] + 1):
                     self.rowListOfHash.append(sensor[0])
         
-        self.rowListOfHash = list(set(self.rowListOfHash))
+        self.rowListOfHash = np.array(list(set(self.rowListOfHash)))
         # print(row, self.rowListOfHash)
-        self.solution1 = len(self.rowListOfHash) if (mode == "count" or row == 10) else 0
+        self.solution1 = len(self.rowListOfHash.tolist()) if (mode == "count" or row == 10) else 0
         
         if mode == "find":
             
         #     self.rowListOfHash = list(set(self.rowListOfHash))
                     
         #     # print(sorted(self.rowListOfHash[self.rowListOfHash.index(rangeS[0]) : self.rowListOfHash[1 + self.rowListOfHash.index(rangeS[1])]]))
-            temprow = []
-            for elem in self.rowListOfHash:
-                if elem in range(rangeS[0], rangeS[1] + 1):
-                    temprow.append(elem)
+            # temprow = []
+            # for elem in self.rowListOfHash:
+            #     if elem in range(rangeS[0], rangeS[1] + 1):
+            #         temprow.append(elem)
+                    
+            # self.rowListOfHash = np.array(self.rowListOfHash)
+            rowListOfHashTrue = (self.rowListOfHash >= rangeS[0]) * (self.rowListOfHash <= rangeS[1])
+            self.rowListOfHash = self.rowListOfHash[np.where(rowListOfHashTrue)]
+            
             # print(temprow)
             # self.solution1 = len(self.rowListOfHash)
-            self.rowListOfHash = sorted(list(set(temprow)))
-            self.solution1 = len(self.rowListOfHash)
+            # self.rowListOfHash = sorted(list(set(temprow)))
+            self.solution1 = len(self.rowListOfHash.tolist())
         
         # print(self.solution1, row)
         
@@ -308,7 +320,8 @@ class Beacons():
             
             
             # print(sorted(self.rowListOfHash[self.rowListOfHash.index(rangeS[0]) : self.rowListOfHash[1 + self.rowListOfHash.index(rangeS[1])]]))
-            if self.rowListOfHash != [colIdx for colIdx in range(rangeS[0], rangeS[1] + 1)]:
+            if len(self.rowListOfHash) != rangeS[1] + 1:
+            # if self.rowListOfHash != [colIdx for colIdx in range(rangeS[0], rangeS[1] + 1)]:
                 # print(self.rowListOfHash, "\n\n", [colIdx for colIdx in range(rangeS[0], rangeS[1] + 1)])
                 beaconFound = True
             print(row)    
