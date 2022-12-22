@@ -297,7 +297,7 @@ class Beacons():
             
                 elem = lists[0]
                 for lisT in lists:
-                    if elem[1] in range(lisT[0] - 1, lisT[1] + 1):
+                    if elem[1] in range(lisT[0], lisT[1] + 1):
                         elem = [min(elem[0], lisT[0]), lisT[1]]
                         # print("ELEM", elem)
                     else:
@@ -382,7 +382,7 @@ class Beacons():
                 self.beacon = [row, column]
         
             
-                self.tuningFreq = self.tuningFreq * self.beacon[1] + self.beacon[0]
+                self.tuningFreq = int(self.tuningFreq) * int(self.beacon[1]) + int(self.beacon[0])
         print("TUNING FREQ", self.tuningFreq, "\n", self.beacon)
         
         return self
