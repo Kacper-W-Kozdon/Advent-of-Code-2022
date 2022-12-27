@@ -9,6 +9,8 @@ import re
 import numpy as np
 import random as rd
 import functools as ft
+import itertools
+
 
 def load_files():
     fContent = []
@@ -59,28 +61,40 @@ class Valves(Valve):
         return self
     
     def preprocess2(self):
+        global myVars
         myVars = vars()
         self.valvesObj = []
         for valve in self.valves:
             myVars.__setitem__(valve[0], Valve())
-            myVars[valve[0]].name = valve[0]
+            myVars[valve[0]].name = valve[0]            
             myVars[valve[0]].to = valve[2]
             myVars[valve[0]].rate = valve[1]
             myVars[valve[0]].from_ = []
             for val in self.valves:
                 if valve[0] in val[2]:
                     myVars[valve[0]].from_.append(val[0])
+            # print(myVars[valve[0]].from_)
+            del val
             self.valvesObj.append(myVars[valve[0]])
-            
-        # print(vars()["valves"])
+        
+        # print(myVars)
+        # print("AA" in vars().keys())
+        
         return self
 
 def run():
     valves = Valves()
     print(valves.preprocess1().preprocess2().valvesObj)
+    print([var.name for var in vars()["valves"].valvesObj])
+    # print([item for item in locals().items()])
+    # print(myVars)
+    # print()
+    # print(vars())
     
     
 print(run())
 
 a = "strings string"
 print(a[a.index(" ") : ])
+b = list(itertools.permutations([1, 2, 3]))
+print(b)
