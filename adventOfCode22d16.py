@@ -31,7 +31,7 @@ class Valve():
         self.from_ = []
         self.to = []
         self.rate = 0
-        self.on = False
+        self.on = False 
 
 
 class Valves(Valve):
@@ -39,7 +39,9 @@ class Valves(Valve):
         super().__init__()
         self.raw = load_files()
         self.valves = []
-        self.valvesObj = []
+        # self.valvesObj = []
+        self.valvesObj = {}
+        
         
         
         
@@ -63,7 +65,8 @@ class Valves(Valve):
     def preprocess2(self):
         global myVars
         myVars = vars()
-        self.valvesObj = []
+        # self.valvesObj = []
+        self.valvesObj = {}
         for valve in self.valves:
             myVars.__setitem__(valve[0], Valve())
             myVars[valve[0]].name = valve[0]            
@@ -75,19 +78,26 @@ class Valves(Valve):
                     myVars[valve[0]].from_.append(val[0])
             # print(myVars[valve[0]].from_)
             del val
-            self.valvesObj.append(myVars[valve[0]])
+            # self.valvesObj.append(myVars[valve[0]])
+            self.valvesObj[valve[0]] = myVars[valve[0]]
         
-        # print(myVars)
+        print(myVars)
         # print("AA" in vars().keys())
+        # print(vars(self))
         
         return self
 
 def run():
     valves = Valves()
     print(valves.preprocess1().preprocess2().valvesObj)
-    print([var.name for var in vars()["valves"].valvesObj])
+    print()
+    print()
+    print([var for var in vars()["valves"].valvesObj])
+    print(vars()["valves"].valvesObj["AA"].name)
     # print([item for item in locals().items()])
-    # print(myVars)
+    print()
+    print()
+    print(vars(valves)["valvesObj"])
     # print()
     # print(vars())
     
