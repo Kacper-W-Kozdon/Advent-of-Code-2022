@@ -41,11 +41,15 @@ class Valves(Valve):
         self.valves = []
         # self.valvesObj = []
         self.valvesObj = {}
+        self.nonZeroRate = []
+        self.permutations = []
         
         
         
         
     def preprocess1(self):
+        self.nonZeroRate = []
+        self.valves = []
         for line in self.raw:
             valveStart = line.index(" ") + 1
             # print(valveStart, line[valveStart + 1 : ].index(" ") )           
@@ -60,7 +64,13 @@ class Valves(Valve):
             # print(tempLine[valves : ])
             valves = tempLine[valves : ]
             self.valves += [[line[valveStart : valveStop], int(line[rateStart : rateStop]), valves.split(", ")]]
+            if int(line[rateStart : rateStop]) > 0:
+                self.nonZeroRate += [line[valveStart : valveStop]]  
+        # print(self.nonZeroRate)
+        self.permutations = list(itertools.permutations(self.nonZeroRate))
+        print(self.permutations)
         return self
+    
     
     def preprocess2(self):
         global myVars
@@ -81,7 +91,8 @@ class Valves(Valve):
             # self.valvesObj.append(myVars[valve[0]])
             self.valvesObj[valve[0]] = myVars[valve[0]]
         
-        print(myVars)
+        # print(myVars)
+        # print(myVars["AA"].to)
         # print("AA" in vars().keys())
         # print(vars(self))
         
