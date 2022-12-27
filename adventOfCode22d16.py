@@ -43,11 +43,13 @@ class Valves(Valve):
         self.valvesObj = {}
         self.nonZeroRate = []
         self.permutations = []
+        self.paths = []
+        self.toEval = []
         
         
         
         
-    def preprocess1(self):
+    def __preprocess1__(self):
         self.nonZeroRate = []
         self.valves = []
         for line in self.raw:
@@ -64,15 +66,15 @@ class Valves(Valve):
             # print(tempLine[valves : ])
             valves = tempLine[valves : ]
             self.valves += [[line[valveStart : valveStop], int(line[rateStart : rateStop]), valves.split(", ")]]
-            if int(line[rateStart : rateStop]) > 0:
+            if int(line[rateStart : rateStop]) > 0 and [line[valveStart : valveStop]] != "AA":
                 self.nonZeroRate += [line[valveStart : valveStop]]  
         # print(self.nonZeroRate)
         self.permutations = list(itertools.permutations(self.nonZeroRate))
-        print(self.permutations)
+        # print(self.permutations)
         return self
     
     
-    def preprocess2(self):
+    def __preprocess2__(self):
         global myVars
         myVars = vars()
         # self.valvesObj = []
@@ -97,18 +99,80 @@ class Valves(Valve):
         # print(vars(self))
         
         return self
+    
+    def prep(self):
+        self.__preprocess1__()
+        self.__preprocess2__()
+        return self
+    
+    def __shortest_path__(self, start = "AA", end = "AA"):
+        endFound = False
+        self.paths = [["AA"]]
+        starts = ["AA"]
+        oldPath = []
+        nextStarts = starts
+        # print(myVars)
+        while not endFound:   
+            starts = nextStarts
+            del nextStarts
+            nextStarts = []
+            for start in starts:
+                pass
+                if end in myVars[start].to:
+                    endFound = True
+                    for pathIdx, path in enumerate(self.paths):
+                        if path[-1] == start:
+                            oldPath = self.paths.pop(pathIdx)
+                            self.paths = oldPath
+                            break
+                    break
+                else:
+                    pass
+                    nextStarts += myVars[start].to
+                    for pathIdx, path in enumerate(self.paths):
+                        if path[-1] == start:
+                            oldPath = self.paths.pop(pathIdx)
+                            oldPath += ["TEMP"]
+                            break
+                    for strt in myVars[start].to:
+                        newPath = oldPath.copy()
+                        newPath[-1] = strt
+                        self.paths.append(newPath)
+            pass
+            
+        return self
+    
+    def eval_paths(self):
+        for perm in self.permutations:
+            permPath = []
+            for valveIdx, valve in enumerate(perm):
+                start = valve
+                permPath.append(start)
+                if valveIdx == len(perm) - 2:
+                    break                
+                end = perm[valveIdx + 1]
+                self.__shortest_path__(start, end)
+                for elem in self.paths:
+                    permPath.append(elem)
+            self.toEval.append([permPath])
+            del permPath
+                
+                
+                
+    
+    
 
 def run():
     valves = Valves()
-    print(valves.preprocess1().preprocess2().valvesObj)
+    valves.prep()
     print()
     print()
-    print([var for var in vars()["valves"].valvesObj])
-    print(vars()["valves"].valvesObj["AA"].name)
+    # print([var for var in vars()["valves"].valvesObj])
+    # print(vars()["valves"].valvesObj["AA"].name)
     # print([item for item in locals().items()])
     print()
     print()
-    print(vars(valves)["valvesObj"])
+    # print(vars(valves)["valvesObj"])
     # print()
     # print(vars())
     
