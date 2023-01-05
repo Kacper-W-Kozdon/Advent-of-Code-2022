@@ -185,14 +185,41 @@ class Valves(Valve):
         return self
     
                     
-    def __calc_flow__(self, path):
-        
+    def __calc_flow__(self, path, order):
+        tempFlow = 0
         self.__reset_valves__()
         
-        self.lastFlow = 0
+        iterPath = iter(path)
+        valve = iter(order)
+        valveToOpen = next(valve)
+        allOpen = False
+        currentStep = "AA"
+        
+        for moment in range(self.totalTime):
+            if self.valvesObj[valveToOpen].on:
+                try:
+                    valveToOpen = next(valve)
+                except:
+                    allOpen = True
+            
+            try:
+                currentStep = path[moment]
+            except:
+                pass
+            
+            if currentStep == valveToOpen or allOpen:
+                try:                
+                    currentStep = next(iterPath)
+                    if self.valvesObj[currentStep].on:
+                        tempFlow += self.valvesObj[currentStep].rate
+                    self.valvesObj[currentStep].on = True
+                except:
+                    pass
+            
+            self.lastFlow += tempFlow
         return self
   
-    def totale_pressure(self):
+    def total_pressure(self):
         self.flows = []
         for path in self.permutations:
             self.__calc_flow__(path)
@@ -254,3 +281,7 @@ a = "strings string"
 print(a[a.index(" ") : ])
 b = list(itertools.permutations([1, 2, 3]))
 print(b)
+c = iter(a)
+next(c)
+d = next(c)
+print(next(c), next(c), d)
