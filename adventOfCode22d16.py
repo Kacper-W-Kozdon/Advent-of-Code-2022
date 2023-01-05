@@ -45,8 +45,9 @@ class Valves(Valve):
         self.permutations = []
         self.paths = []
         self.toEval = []
-        
-        
+        self.totalTime = 30
+        self.flows = []
+        self.lastFlow = 0
         
         
     def __preprocess1__(self):
@@ -170,10 +171,33 @@ class Valves(Valve):
             self.toEval[pathIdx] = path
             
         return self
+    
+    
+    
+    '''
+    Need to: count total time all valves are open and the count the flow for the period the valves are getting opened
+    
+    '''
+    
+    def __reset_valves__(self):
+        for valve in self.valvesObj:
+            valve.on = False
+        return self
+    
                     
-                
+    def __calc_flow__(self, path):
+        
+        self.__reset_valves__()
+        
+        self.lastFlow = 0
+        return self
   
-                
+    def totale_pressure(self):
+        self.flows = []
+        for path in self.permutations:
+            self.__calc_flow__(path)
+            self.flows.append(self.lastFlow)
+        return self                
   
     
     def test_meth(self):
