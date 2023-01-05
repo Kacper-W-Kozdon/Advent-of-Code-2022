@@ -107,62 +107,6 @@ class Valves(Valve):
     
     def __shortest_path__(self, start = "AA", end = "AA"):
         endFound = False
-        self.paths = [["AA"]]
-        starts = ["AA"]
-        oldPath = []
-        nextStarts = starts
-        # print(myVars)
-        while not endFound:   
-            starts = nextStarts
-            del nextStarts
-            nextStarts = []
-            for start in starts:
-                pass
-                if end in myVars[start].to:
-                    endFound = True
-                    for pathIdx, path in enumerate(self.paths):
-                        if path[-1] == start:
-                            oldPath = self.paths.pop(pathIdx)
-                            self.paths = oldPath
-                            break
-                    break
-                else:
-                    pass
-                    nextStarts += myVars[start].to
-                    for pathIdx, path in enumerate(self.paths):
-                        if path[-1] == start:
-                            oldPath = self.paths.pop(pathIdx)
-                            oldPath += ["TEMP"]
-                            break
-                    for strt in myVars[start].to:
-                        newPath = oldPath.copy()
-                        newPath[-1] = strt
-                        self.paths.append(newPath)
-            pass
-            
-        return self
-    
-    def eval_paths(self):
-        for perm in self.permutations:
-            permPath = []
-            for valveIdx, valve in enumerate(perm):
-                start = valve
-                permPath.append(start)
-                if valveIdx == len(perm) - 2:
-                    break                
-                end = perm[valveIdx + 1]
-                self.__shortest_path__(start, end)
-                for elem in self.paths:
-                    permPath.append(elem)
-            self.toEval.append([permPath])
-            del permPath
-                
-  
-                
-  
-    
-    def test_meth(self, start = "AA", end = "EE"):
-        endFound = False
         self.paths = [[start]]
         starts = [start]
         oldPath = []
@@ -197,13 +141,77 @@ class Valves(Valve):
             pass
             
         return self  
+    
+    def eval_paths(self):
+        # print(self.permutations)
+        for perm in self.permutations:
+            # print(perm)
+            permPath = []
+            for valveIdx, valve in enumerate(perm):
+                start = valve
+                permPath.append(start)
+                if valveIdx == len(perm) - 1:
+                    break                
+                end = perm[valveIdx + 1]
+                self.__shortest_path__(start, end)
+                for elem in self.paths:
+                    permPath.append(elem)
+                
+            self.toEval.append(permPath)
+            del permPath
+            
+        for pathIdx, path in enumerate(self.toEval):
+            start = "AA"
+            end = path[0]
+            self.__shortest_path__(start, end)
+            # print(self.paths)
+            while len(self.paths) > 0:
+                path.insert(0, self.paths.pop(-1))
+            self.toEval[pathIdx] = path
+            
+        return self
+                    
+                
+  
+                
+  
+    
+    def test_meth(self):
+        # print(self.permutations)
+        for perm in self.permutations:
+            # print(perm)
+            permPath = []
+            for valveIdx, valve in enumerate(perm):
+                start = valve
+                permPath.append(start)
+                if valveIdx == len(perm) - 1:
+                    break                
+                end = perm[valveIdx + 1]
+                self.__shortest_path__(start, end)
+                for elem in self.paths:
+                    permPath.append(elem)
+                
+            self.toEval.append(permPath)
+            del permPath
+            
+        for pathIdx, path in enumerate(self.toEval):
+            start = "AA"
+            end = path[0]
+            self.__shortest_path__(start, end)
+            # print(self.paths)
+            while len(self.paths) > 0:
+                path.insert(0, self.paths.pop(-1))
+            self.toEval[pathIdx] = path
+            
+        return self
                     
     
     
 
 def run():
     valves = Valves()
-    print("TEST", valves.prep().test_meth().paths)
+    print("TEST", valves.prep().test_meth().toEval)
+    # print(valves.permutations)
     print()
     print()
     # print([var for var in vars()["valves"].valvesObj])
