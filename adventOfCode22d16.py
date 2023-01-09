@@ -48,6 +48,7 @@ class Valves(Valve):
         self.totalTime = 29
         self.flows = []
         self.lastFlow = 0
+        self.totalFlow = 0
         
         
     def __preprocess1__(self):
@@ -188,19 +189,25 @@ class Valves(Valve):
                     
     def __calc_flow__(self, path, order):
         tempFlow = 0
+        self.totalFlow = 0
         self.lastFlow = 0
+        visited = []
         self.__reset_valves__()
-        
+        # print(path)
         iterPath = iter(path)
         valve = iter(order)
         valveToOpen = next(valve)
+        visited.append(valveToOpen)
         allOpen = False
         currentStep = "AA"
         
         for moment in range(self.totalTime):
+            
             if self.valvesObj[valveToOpen].on:
                 try:
+                    
                     valveToOpen = next(valve)
+                    
                 except:
                     allOpen = True
             
@@ -210,14 +217,18 @@ class Valves(Valve):
                 pass
             
             if currentStep == valveToOpen or allOpen:
-                try:                
+                try:   
+                    # print(currentStep)
                     if self.valvesObj[currentStep].on:
-                        tempFlow += self.valvesObj[currentStep].rate
+                        tempFlow += self.valvesObj[currentStep].rate   #This line needs to get changed.
+                        print(tempFlow, self.valvesObj[currentStep].rate)
                     self.valvesObj[currentStep].on = True
+                    visited.append(currentStep)
                 except:
                     pass
             
             self.lastFlow += tempFlow
+            self.totalFlow = self.lastFlow
         return self
   
     def total_pressure(self):
@@ -227,7 +238,9 @@ class Valves(Valve):
             path = self.toEval[orderIdx]
             
             self.__calc_flow__(path, order)
-            self.flows.append(self.lastFlow)
+            self.flows.append(self.totalFlow)
+            print()
+            print()
         print(max(self.flows))
         return self                
   
