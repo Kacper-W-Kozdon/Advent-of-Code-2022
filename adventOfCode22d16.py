@@ -188,6 +188,7 @@ class Valves(Valve):
                     
     def __calc_flow__(self, path, order):
         tempFlow = 0
+        self.lastFlow = 0
         self.__reset_valves__()
         
         iterPath = iter(path)
