@@ -45,7 +45,7 @@ class Valves(Valve):
         self.permutations = []
         self.paths = []
         self.toEval = []
-        self.totalTime = 30
+        self.totalTime = 29
         self.flows = []
         self.lastFlow = 0
         
