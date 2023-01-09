@@ -14,7 +14,7 @@ import itertools
 
 def load_files():
     fContent = []
-    with open("inputtest.txt") as f:
+    with open("input16.txt") as f:
         
         for (lineIndex, line) in enumerate(f):  #loading the file into an np.array
             if bool(line) and line != "\n":
@@ -72,7 +72,7 @@ class Valves(Valve):
             if int(line[rateStart : rateStop]) > 0 and [line[valveStart : valveStop]] != "AA":
                 self.nonZeroRate += [line[valveStart : valveStop]]  
         # print(self.nonZeroRate)
-        self.permutations = list(itertools.permutations(self.nonZeroRate))
+        self.permutations = list(itertools.permutations(self.nonZeroRate))  #Use lexicographic order and generate one by one the path
         # print(self.permutations)
         return self
     
