@@ -181,7 +181,8 @@ class Valves(Valve):
     
     def __reset_valves__(self):
         for valve in self.valvesObj:
-            valve.on = False
+            # print("VALVE", valve)
+            self.valvesObj[valve].on = False
         return self
     
                     
@@ -209,7 +210,6 @@ class Valves(Valve):
             
             if currentStep == valveToOpen or allOpen:
                 try:                
-                    currentStep = next(iterPath)
                     if self.valvesObj[currentStep].on:
                         tempFlow += self.valvesObj[currentStep].rate
                     self.valvesObj[currentStep].on = True
@@ -221,9 +221,13 @@ class Valves(Valve):
   
     def total_pressure(self):
         self.flows = []
-        for path in self.permutations:
-            self.__calc_flow__(path)
+        for orderIdx, order in enumerate(self.permutations):
+            # print(self.toEval)
+            path = self.toEval[orderIdx]
+            
+            self.__calc_flow__(path, order)
             self.flows.append(self.lastFlow)
+        print(max(self.flows))
         return self                
   
     
@@ -261,7 +265,7 @@ class Valves(Valve):
 
 def run():
     valves = Valves()
-    print("TEST", valves.prep().test_meth().toEval)
+    print("TEST", valves.prep().eval_paths().total_pressure())
     # print(valves.permutations)
     print()
     print()
