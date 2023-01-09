@@ -45,10 +45,11 @@ class Valves(Valve):
         self.permutations = []
         self.paths = []
         self.toEval = []
-        self.totalTime = 29
+        self.totalTime = 30
         self.flows = []
         self.lastFlow = 0
         self.totalFlow = 0
+        self.solution1 = 0
         
         
     def __preprocess1__(self):
@@ -169,7 +170,7 @@ class Valves(Valve):
             # print(self.paths)
             while len(self.paths) > 0:
                 path.insert(0, self.paths.pop(-1))
-            self.toEval[pathIdx] = path
+            self.toEval[pathIdx] = path + [path[-1]]
             
         return self
     
@@ -197,12 +198,36 @@ class Valves(Valve):
         iterPath = iter(path)
         valve = iter(order)
         valveToOpen = next(valve)
+        # valveToOpen = next(valve)
         visited.append(valveToOpen)
         allOpen = False
         currentStep = "AA"
-        
+        # print(path, order)
         for moment in range(self.totalTime):
             
+            
+            
+            try:
+                currentStep = path[moment]
+                previousStep = path[moment - 1]
+                # print(previousStep, currentStep, valveToOpen, self.valvesObj[currentStep].on)
+            except:
+                pass
+            
+            if (previousStep == valveToOpen) or allOpen:
+                try:   
+                    # print(currentStep)
+                    # print(self.valvesObj[currentStep].on)
+                    # if self.valvesObj[previousStep].on:
+                    if previousStep == currentStep and currentStep == valveToOpen and not allOpen:
+                        tempFlow += self.valvesObj[currentStep].rate   #This line needs to get changed.
+                        # print(tempFlow, self.valvesObj[currentStep].rate)
+                    self.valvesObj[currentStep].on = True
+                    # print(self.valvesObj[currentStep].on)
+                    visited.append(currentStep)
+                except:
+                    pass
+                
             if self.valvesObj[valveToOpen].on:
                 try:
                     
@@ -210,23 +235,9 @@ class Valves(Valve):
                     
                 except:
                     allOpen = True
-            
-            try:
-                currentStep = path[moment]
-            except:
-                pass
-            
-            if currentStep == valveToOpen or allOpen:
-                try:   
-                    # print(currentStep)
-                    if self.valvesObj[currentStep].on:
-                        tempFlow += self.valvesObj[currentStep].rate   #This line needs to get changed.
-                        print(tempFlow, self.valvesObj[currentStep].rate)
-                    self.valvesObj[currentStep].on = True
-                    visited.append(currentStep)
-                except:
-                    pass
-            
+                    
+                    
+            # print(self.valvesObj["BB"].on)
             self.lastFlow += tempFlow
             self.totalFlow = self.lastFlow
         return self
@@ -239,9 +250,10 @@ class Valves(Valve):
             
             self.__calc_flow__(path, order)
             self.flows.append(self.totalFlow)
-            print()
-            print()
+            # print()
+            # print()
         print(max(self.flows))
+        self.solution1 = max(self.flows)
         return self                
   
     
