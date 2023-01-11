@@ -254,11 +254,12 @@ class Valves(Valve):
             # print()
             # print()
         print(max(self.flows))
-        self.solution1 = max(self.flows)
+        if max(self.flows) > self.solution1:
+            self.solution1 = max(self.flows)
         return self   
     
     
-    def __lex_ord__(self):
+    def __lex_ord__(self):   #Orders rates lexicographically.
         self.nonZeroRate.sort()
         self.permsFlag = True
         return self
@@ -269,6 +270,7 @@ class Valves(Valve):
                 listToPermute[idx - 1]
             except:
                 self.permsFlag = False
+                return self.permsFlag
             if listToPermute[idx - 1] < listToPermute[idx]:
                 idxToSwap1 = idx - 1
                 valToSwap1 = listToPermute[idxToSwap1]
@@ -284,14 +286,30 @@ class Valves(Valve):
         listToPermute[idxToSwap1 + 1 : ] = listToPermute[ : idxToSwap1 : -1]
         return listToPermute
     
-    def __gen_permutations__(self):
-        
+    def __gen_permutations__(self):   #Fill up self.permutations with 1000 new permutations.
+        if self.permutations == []:
+            self.permutations.append(self.nonZeroRate)
+        else:
+            while len(self.permutations) < 1000:
+                if self.__permute__(self.permutations[-1]):
+                    self.permutations.append(self.__permute__(self.permutations[-1]))
+                else:
+                    break
         return self
     
-    def total_pressure2(self):
+    def __clean_perms__(self):
+        while len(self.permutations) > 1:
+            self.permutations.pop(0)
+    
+    def total_pressure2(self):   #Use the original function but generate permutations in steps (not all at once).
         self.__lex_ord__()
-        self.__permute__()
+        self.permutations = []
         self.solution1 = 0
+        while self.permsFlag:
+            self.__gen_permutations__()
+            self.total_pressure()
+            self.__clean_perms__()
+        
         return self             
   
     
