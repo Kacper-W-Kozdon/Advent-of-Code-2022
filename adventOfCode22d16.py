@@ -35,7 +35,7 @@ class Valve():
 
 
 class Valves(Valve):
-    def __init__(self):
+    def __init__(self, test = 0):
         super().__init__()
         self.raw = load_files()
         self.valves = []
@@ -50,9 +50,10 @@ class Valves(Valve):
         self.lastFlow = 0
         self.totalFlow = 0
         self.solution1 = 0
+        self.permsFlag = True
         
         
-    def __preprocess1__(self):
+    def __preprocess1__(self, test = 0):
         self.nonZeroRate = []
         self.valves = []
         for line in self.raw:
@@ -72,7 +73,7 @@ class Valves(Valve):
             if int(line[rateStart : rateStop]) > 0 and [line[valveStart : valveStop]] != "AA":
                 self.nonZeroRate += [line[valveStart : valveStop]]  
         # print(self.nonZeroRate)
-        self.permutations = list(itertools.permutations(self.nonZeroRate))  #Use lexicographic order and generate one by one the path
+        self.permutations = list(itertools.permutations(self.nonZeroRate)) if test else 0 #Use lexicographic order and generate one by one the path
         # print(self.permutations)
         return self
     
@@ -103,12 +104,12 @@ class Valves(Valve):
         
         return self
     
-    def prep(self):
-        self.__preprocess1__()
+    def prep(self, test = 0):
+        self.__preprocess1__(test)
         self.__preprocess2__()
         return self
     
-    def __shortest_path__(self, start = "AA", end = "AA"):
+    def __shortest_path__(self, start = "AA", end = "AA", test = 0):
         endFound = False
         self.paths = [[start]]
         starts = [start]
@@ -254,7 +255,44 @@ class Valves(Valve):
             # print()
         print(max(self.flows))
         self.solution1 = max(self.flows)
-        return self                
+        return self   
+    
+    
+    def __lex_ord__(self):
+        self.nonZeroRate.sort()
+        self.permsFlag = True
+        return self
+    
+    def __permute__(self, listToPermute):
+        for idx in range(len(listToPermute) - 1, -1, -1):
+            try:
+                listToPermute[idx - 1]
+            except:
+                self.permsFlag = False
+            if listToPermute[idx - 1] < listToPermute[idx]:
+                idxToSwap1 = idx - 1
+                valToSwap1 = listToPermute[idxToSwap1]
+                break
+        for idx in range(len(listToPermute) - 1, idxToSwap1, -1):
+            if listToPermute[idx] > listToPermute[idxToSwap1]:
+                idxToSwap2 = idx
+                valToSwap2 = listToPermute[idxToSwap2]
+                break
+        
+        listToPermute[idxToSwap1] = valToSwap2
+        listToPermute[idxToSwap2] = valToSwap1
+        listToPermute[idxToSwap1 + 1 : ] = listToPermute[ : idxToSwap1 : -1]
+        return listToPermute
+    
+    def __gen_permutations__(self):
+        
+        return self
+    
+    def total_pressure2(self):
+        self.__lex_ord__()
+        self.__permute__()
+        self.solution1 = 0
+        return self             
   
     
     def test_meth(self):
