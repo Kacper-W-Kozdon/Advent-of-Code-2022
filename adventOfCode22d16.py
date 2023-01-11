@@ -14,7 +14,7 @@ import itertools
 
 def load_files():
     fContent = []
-    with open("input16.txt") as f:
+    with open("inputtest.txt") as f:
         
         for (lineIndex, line) in enumerate(f):  #loading the file into an np.array
             if bool(line) and line != "\n":
@@ -297,19 +297,24 @@ class Valves(Valve):
                     break
         return self
     
-    def __clean_perms__(self):
+    def __clean_perms_and_paths__(self):
         while len(self.permutations) > 1:
             self.permutations.pop(0)
+        while len(self.toEval) > 0:
+            self.toEval.pop(0)
+        return self
     
-    def total_pressure2(self):   #Use the original function but generate permutations in steps (not all at once).
+    def total_pressure2(self):  #Use the original function but generate permutations in steps (not all at once).
+        self.prep()
         self.__lex_ord__()
         self.permutations = []
         self.solution1 = 0
         while self.permsFlag:
             self.__gen_permutations__()
+            self.toEval()
             self.total_pressure()
-            self.__clean_perms__()
-        
+            self.__clean_perms_and_paths__()
+        print(self.solution1)
         return self             
   
     
@@ -347,7 +352,7 @@ class Valves(Valve):
 
 def run():
     valves = Valves()
-    print("TEST", valves.prep().eval_paths().total_pressure())
+    print("TEST", valves.total_pressure2())
     # print(valves.permutations)
     print()
     print()
