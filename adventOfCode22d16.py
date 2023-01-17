@@ -264,7 +264,7 @@ class Valves(Valve):
         self.permsFlag = True
         return self
     
-    def __permute__(self, listToPermute):
+    def __permute__(self, listToPermute = [1, 2, 3, 4]):
         for idx in range(len(listToPermute) - 1, -1, -1):
             try:
                 listToPermute[idx - 1]
@@ -366,7 +366,7 @@ def run():
     # print(vars())
     
     
-print(run())
+# print(run())
 
 a = "strings string"
 print(a[a.index(" ") : ])
@@ -376,3 +376,46 @@ c = iter(a)
 next(c)
 d = next(c)
 print(next(c), next(c), d)
+
+'''
+Need to look at the test_fun and correct what is returned and at what point permutations are added to the list. Or not- in fact, "while test_fun()" is the missing second call
+of the function that was messing with me. Still need to change the "try/except" bit, because the current rule does not break the loop
+since idx - 1 == -1 is a valid index.
+'''
+
+
+def test_fun(listToPermute = [1, 2, 3, 4]):
+    print(listToPermute)
+    for idx in range(len(listToPermute) - 1, -1, -1):
+        try:
+            listToPermute[idx - 1]
+            
+        except:
+            
+            return 0
+        
+        
+        if listToPermute[idx - 1] < listToPermute[idx]:
+            idxToSwap1 = idx - 1
+            valToSwap1 = listToPermute[idxToSwap1]
+            break
+    for idx in range(len(listToPermute) - 1, idxToSwap1, -1):
+        if listToPermute[idx] > listToPermute[idxToSwap1]:
+            idxToSwap2 = idx
+            valToSwap2 = listToPermute[idxToSwap2]
+            break
+    
+    listToPermute[idxToSwap1] = valToSwap2
+    listToPermute[idxToSwap2] = valToSwap1
+    listToPermute[idxToSwap1 + 1 : ] = listToPermute[ : idxToSwap1 : -1]
+    # print(listToPermute)
+    return listToPermute
+
+def test_fun_run():
+    i = 0
+    while test_fun():
+        i += 1
+        print(i)
+        test_fun()
+        
+test_fun_run()
