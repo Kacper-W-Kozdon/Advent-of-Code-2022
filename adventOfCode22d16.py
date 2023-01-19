@@ -123,12 +123,15 @@ class Valves(Valve):
         starts = [start]
         oldPath = []
         nextStarts = starts
+        print(len(starts))
         # print(myVars)
         while not endFound:   
             starts = nextStarts
             del nextStarts
             nextStarts = []
+            # print(len(starts))   # <----- PROBLEM!
             for start in starts:
+                
                 pass
                 if end in myVars[start].to:
                     endFound = True
@@ -156,7 +159,7 @@ class Valves(Valve):
         return self  
     
     '''
-    EVAL_PATHS NEED TO BE CHECKED FOR SPEED
+    EVAL_PATHS NEED TO BE CHECKED FOR SPEED. UPDATE- PROBLEM IS IN __SHORTEST_PATH__
     
     '''
     
