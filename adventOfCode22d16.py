@@ -51,6 +51,7 @@ class Valves(Valve):
         self.totalFlow = 0
         self.solution1 = 0
         self.permsFlag = True
+        self.batchSize = 1000
         
         
     def __preprocess1__(self, test = 0):
@@ -160,6 +161,7 @@ class Valves(Valve):
                         newPath[-1] = strt
                         self.paths.append(newPath)
             pass
+        # print(self.paths)
         t2 = time.time()
         # print(t2 - t1)
         return self  
@@ -204,7 +206,7 @@ class Valves(Valve):
             self.toEval[pathIdx] = path + [path[-1]]
         t3 = time.time()
         # print(t2 - t1, t3 - t2, t5 - t4)
-            
+        # print(self.toEval)    
         return self
     
     
@@ -337,7 +339,7 @@ class Valves(Valve):
             self.permutations.append(self.nonZeroRate)
             # print(self.permutations)
         if len(self.permutations) > 0:
-            while len(self.permutations) < 2:
+            while len(self.permutations) < self.batchSize:
                 # i += 1
                 # print(i)
                 if self.permsFlag:
@@ -370,8 +372,10 @@ class Valves(Valve):
         self.permutations = []
         self.solution1 = 0
         self.permsFlag = 1
+        t0 = time.time()
+        t5 = time.time()
         while self.permsFlag:
-            print(self.solution1, i) if not i % 1000 else 0
+            print(self.solution1, i, t5 - t0) if not i % 10 else 0
             i += 1
             t1 = time.time()
             self.__gen_permutations__()
