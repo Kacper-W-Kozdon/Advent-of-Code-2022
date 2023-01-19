@@ -384,15 +384,12 @@ since idx - 1 == -1 is a valid index.
 '''
 
 
-def test_fun(listToPermute = [1, 2, 3, 4]):
+def test_fun(listToPermute = [1, 2, 3, 4], test = 1):
     print(listToPermute)
     for idx in range(len(listToPermute) - 1, -1, -1):
-        try:
-            listToPermute[idx - 1]
-            
-        except:
-            
-            return 0
+        if idx - 1 == -1:
+            test = 0
+            return test
         
         
         if listToPermute[idx - 1] < listToPermute[idx]:
@@ -413,9 +410,10 @@ def test_fun(listToPermute = [1, 2, 3, 4]):
 
 def test_fun_run():
     i = 0
+    test = 1
     while test_fun():
         i += 1
         print(i)
-        test_fun()
+        
         
 test_fun_run()
