@@ -123,7 +123,7 @@ class Valves(Valve):
         starts = [start]
         oldPath = []
         nextStarts = starts
-        print(len(starts))
+        # print(len(starts))
         # print(myVars)
         while not endFound:   
             starts = nextStarts
@@ -133,6 +133,7 @@ class Valves(Valve):
             for start in starts:
                 
                 pass
+                # print(starts)
                 if end in myVars[start].to:
                     endFound = True
                     for pathIdx, path in enumerate(self.paths):
@@ -143,7 +144,12 @@ class Valves(Valve):
                     break
                 else:
                     pass
-                    nextStarts += myVars[start].to
+                    # print(myVars[start].to)
+                    for elem in myVars[start].to:
+                        # print(elem)
+                        if elem not in nextStarts:
+                            nextStarts += [elem]
+                    # print(len(nextStarts))
                     for pathIdx, path in enumerate(self.paths):
                         if path[-1] == start:
                             oldPath = self.paths.pop(pathIdx)
@@ -358,13 +364,15 @@ class Valves(Valve):
         return self
     
     def total_pressure2(self):  #Use the original function but generate permutations in steps (not all at once).
+        i = 0
         self.prep()
         self.__lex_ord__()
         self.permutations = []
         self.solution1 = 0
         self.permsFlag = 1
         while self.permsFlag:
-            print(self.solution1)
+            print(self.solution1, i) if not i % 1000 else 0
+            i += 1
             t1 = time.time()
             self.__gen_permutations__()
             t2 = time.time()
