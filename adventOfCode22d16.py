@@ -51,7 +51,7 @@ class Valves(Valve):
         self.totalFlow = 0
         self.solution1 = 0
         self.permsFlag = True
-        self.batchSize = 2**20
+        self.batchSize = 2**10
         
         
     def __preprocess1__(self, test = 0):
