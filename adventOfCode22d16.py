@@ -150,7 +150,7 @@ class Valves(Valve):
                         if elem not in nextStarts:
                             nextStarts += [elem]
                     # print(len(nextStarts))
-                    for pathIdx, path in enumerate(self.paths):
+                    for pathIdx, path in enumerate(self.paths):   # <----- THIS PROBABLY CAN BE DONE MUCH BETTER.
                         if path[-1] == start:
                             oldPath = self.paths.pop(pathIdx)
                             oldPath += ["TEMP"]
