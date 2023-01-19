@@ -241,6 +241,7 @@ class Valves(Valve):
             # print(self.valvesObj["BB"].on)
             self.lastFlow += tempFlow
             self.totalFlow = self.lastFlow
+            # print(self.totalFlow)
         return self
   
     def total_pressure(self):
@@ -248,12 +249,16 @@ class Valves(Valve):
         for orderIdx, order in enumerate(self.permutations):
             # print(self.toEval)
             path = self.toEval[orderIdx]
+            # print(order)
+            # print(self.permutations[orderIdx])
+            # print()
             
             self.__calc_flow__(path, order)
             self.flows.append(self.totalFlow)
             # print()
             # print()
-        print(max(self.flows))
+        # print(max(self.flows))
+        # print((np.array(self.flows) == 1429).astype(int))
         if max(self.flows) > self.solution1:
             self.solution1 = max(self.flows)
         return self   
@@ -266,9 +271,7 @@ class Valves(Valve):
     
     def __permute__(self, listToPermute = [1, 2, 3, 4]):
         for idx in range(len(listToPermute) - 1, -1, -1):
-            try:
-                listToPermute[idx - 1]
-            except:
+            if idx - 1 == -1:
                 self.permsFlag = False
                 return self.permsFlag
             if listToPermute[idx - 1] < listToPermute[idx]:
@@ -284,17 +287,36 @@ class Valves(Valve):
         listToPermute[idxToSwap1] = valToSwap2
         listToPermute[idxToSwap2] = valToSwap1
         listToPermute[idxToSwap1 + 1 : ] = listToPermute[ : idxToSwap1 : -1]
-        return listToPermute
+        # print(listToPermute)
+        self.permutations.append(listToPermute)
+        # print(self.permutations[0] != self.permutations[-1])
+        # print(self.permutations[-1], len(self.permutations))
+        return self
     
     def __gen_permutations__(self):   #Fill up self.permutations with 1000 new permutations.
+        i = 1
         if self.permutations == []:
+            # print(self.nonZeroRate)
+            self.__lex_ord__()
             self.permutations.append(self.nonZeroRate)
-        else:
+            # print(self.permutations)
+        if len(self.permutations) > 0:
             while len(self.permutations) < 1000:
-                if self.__permute__(self.permutations[-1]):
-                    self.permutations.append(self.__permute__(self.permutations[-1]))
+                i += 1
+                # print(i)
+                if self.permsFlag:
+                    listToPermute = self.permutations[-1].copy()
+                    self.__permute__(listToPermute)
+                    
+                    # print(len(self.permutations)) if len(self.permutations) % 100 == 0 else 0
                 else:
                     break
+        if type(self.permutations[-1]) == bool:
+            self.permutations.pop(-1)
+        print(self.permutations[0], self.permutations[-1])
+        # print(len(self.permutations))
+        print("//////")
+        
         return self
     
     def __clean_perms_and_paths__(self):
@@ -309,50 +331,52 @@ class Valves(Valve):
         self.__lex_ord__()
         self.permutations = []
         self.solution1 = 0
+        self.permsFlag = 1
         while self.permsFlag:
+                       
             self.__gen_permutations__()
-            self.toEval()
+            # print(self.permutations)
+            # if self.permsFlag == 0:
+            #     break
+            # print(len(self.permutations))
+            self.eval_paths()
             self.total_pressure()
             self.__clean_perms_and_paths__()
+            
         print(self.solution1)
         return self             
   
     
-    def test_meth(self):
+    def test_total_pressure2(self):
+        self.prep()
+        self.__lex_ord__()
+        self.permutations = []
+        self.solution1 = 0
+        self.permsFlag = 1
+        self.__gen_permutations__()
         # print(self.permutations)
-        for perm in self.permutations:
-            # print(perm)
-            permPath = []
-            for valveIdx, valve in enumerate(perm):
-                start = valve
-                permPath.append(start)
-                if valveIdx == len(perm) - 1:
-                    break                
-                end = perm[valveIdx + 1]
-                self.__shortest_path__(start, end)
-                for elem in self.paths:
-                    permPath.append(elem)
-                
-            self.toEval.append(permPath)
-            del permPath
+        # self.__gen_permutations__()
+        # print(self.permutations)
+        # while self.permsFlag:
+                       
             
-        for pathIdx, path in enumerate(self.toEval):
-            start = "AA"
-            end = path[0]
-            self.__shortest_path__(start, end)
-            # print(self.paths)
-            while len(self.paths) > 0:
-                path.insert(0, self.paths.pop(-1))
-            self.toEval[pathIdx] = path
+        #     # print(self.permutations)
+        #     # if self.permsFlag == 0:
+        #     #     break
+        #     # print(len(self.permutations))
+        #     self.eval_paths()
+        #     self.total_pressure()
+        #     self.__clean_perms_and_paths__()
             
-        return self
+        print(self.solution1)
+        return self   
                     
     
     
 
 def run():
     valves = Valves()
-    print("TEST", valves.total_pressure2())
+    print("TEST", valves.total_pressure2().solution1)
     # print(valves.permutations)
     print()
     print()
@@ -366,7 +390,7 @@ def run():
     # print(vars())
     
     
-# print(run())
+print(run())
 
 a = "strings string"
 print(a[a.index(" ") : ])
@@ -409,11 +433,11 @@ def test_fun(listToPermute = [1, 2, 3, 4], test = 1):
     return listToPermute
 
 def test_fun_run():
-    i = 0
+    i = 1
     test = 1
     while test_fun():
         i += 1
         print(i)
         
         
-test_fun_run()
+# test_fun_run()
