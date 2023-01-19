@@ -4,7 +4,7 @@ Created on Fri Dec 23 15:31:52 2022
 
 @author: xBubblex
 """
-
+import time
 import re
 import numpy as np
 import random as rd
@@ -109,7 +109,15 @@ class Valves(Valve):
         self.__preprocess2__()
         return self
     
+    '''
+    __SHORTEST_PATH__ MIGHT NEED REWRITING FOR SPEED.
+    
+    '''
+    
+    
     def __shortest_path__(self, start = "AA", end = "AA", test = 0):
+        t1 = time.time()
+        
         endFound = False
         self.paths = [[start]]
         starts = [start]
@@ -143,27 +151,40 @@ class Valves(Valve):
                         newPath[-1] = strt
                         self.paths.append(newPath)
             pass
-            
+        t2 = time.time()
+        # print(t2 - t1)
         return self  
+    
+    '''
+    EVAL_PATHS NEED TO BE CHECKED FOR SPEED
+    
+    '''
+    
     
     def eval_paths(self):
         # print(self.permutations)
+        
         for perm in self.permutations:
             # print(perm)
             permPath = []
+            t1 = time.time()
             for valveIdx, valve in enumerate(perm):
+                
+                # print(valveIdx)
                 start = valve
                 permPath.append(start)
                 if valveIdx == len(perm) - 1:
                     break                
                 end = perm[valveIdx + 1]
+                t4 = time.time()
                 self.__shortest_path__(start, end)
+                
                 for elem in self.paths:
                     permPath.append(elem)
-                
+                t5 = time.time()
             self.toEval.append(permPath)
             del permPath
-            
+            t2 = time.time()
         for pathIdx, path in enumerate(self.toEval):
             start = "AA"
             end = path[0]
@@ -172,6 +193,8 @@ class Valves(Valve):
             while len(self.paths) > 0:
                 path.insert(0, self.paths.pop(-1))
             self.toEval[pathIdx] = path + [path[-1]]
+        t3 = time.time()
+        # print(t2 - t1, t3 - t2, t5 - t4)
             
         return self
     
@@ -270,6 +293,7 @@ class Valves(Valve):
         return self
     
     def __permute__(self, listToPermute = [1, 2, 3, 4]):
+        t1 = time.time()
         for idx in range(len(listToPermute) - 1, -1, -1):
             if idx - 1 == -1:
                 self.permsFlag = False
@@ -291,10 +315,13 @@ class Valves(Valve):
         self.permutations.append(listToPermute)
         # print(self.permutations[0] != self.permutations[-1])
         # print(self.permutations[-1], len(self.permutations))
+        t2 = time.time()
+        # print(t2 - t1)
         return self
     
     def __gen_permutations__(self):   #Fill up self.permutations with 1000 new permutations.
-        i = 1
+        # i = 1
+        t1 = time.time()
         if self.permutations == []:
             # print(self.nonZeroRate)
             self.__lex_ord__()
@@ -302,7 +329,7 @@ class Valves(Valve):
             # print(self.permutations)
         if len(self.permutations) > 0:
             while len(self.permutations) < 2:
-                i += 1
+                # i += 1
                 # print(i)
                 if self.permsFlag:
                     listToPermute = self.permutations[-1].copy()
@@ -316,7 +343,8 @@ class Valves(Valve):
         # print(self.permutations[0], self.permutations[-1])
         # print(len(self.permutations))
         # print("//////")
-        
+        t2 = time.time()
+        # print(t2 - t1)
         return self
     
     def __clean_perms_and_paths__(self):
@@ -334,14 +362,20 @@ class Valves(Valve):
         self.permsFlag = 1
         while self.permsFlag:
             print(self.solution1)
+            t1 = time.time()
             self.__gen_permutations__()
+            t2 = time.time()
             # print(self.permutations)
             # if self.permsFlag == 0:
             #     break
             # print(len(self.permutations))
-            self.eval_paths()
+            self.eval_paths()                   #EVAL PATHS NEED TO BE CHECKED FOR SPEED
+            t3 = time.time()
             self.total_pressure()
+            t4 = time.time()
             self.__clean_perms_and_paths__()
+            t5 = time.time()
+            # print(t2 - t1, t3 - t2, t4 - t3, t5 - t4)
             
         print(self.solution1)
         return self             
