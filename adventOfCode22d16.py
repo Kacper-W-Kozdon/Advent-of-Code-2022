@@ -107,7 +107,7 @@ class Valves(Valve):
         
         return self
     
-    def prep(self, test = 0):
+    def __prep__(self, test = 0):
         self.__preprocess1__(test)
         self.__preprocess2__()
         return self
@@ -144,9 +144,9 @@ class Valves(Valve):
                             oldPath = self.paths.pop(pathIdx)
                             self.paths = oldPath
                             if not self.distances[str(oldPath[0])]:
-                                self.distances[str(oldPath[0])] = {str(oldPath[-1]): len(oldPath) + 1}
+                                self.distances[str(oldPath[0])] = {str(oldPath[-1]): len(oldPath)}
                             else:
-                                self.distances[str(oldPath[0])].update({str(oldPath[-1]): len(oldPath) + 1})
+                                self.distances[str(oldPath[0])].update({str(oldPath[-1]): len(oldPath)})
                             break
                     break
                 else:
@@ -171,35 +171,91 @@ class Valves(Valve):
         t2 = time.time()
         # print(t2 - t1)
         return self  
-    
-    def __get_distances__(self):
+    def __eval_path__(self):
+        time = self.totalTime
+        tempFlow = 0
+        totalFlow = 0
+        for idx, _ in enumerate(self.nonZeroRate):
+            if idx == 0:
+                pass
+            else:
+                stop = self.nonZeroRate[idx]
+                start = self.nonZeroRate[idx - 1]
+                time += - self.distances[start][stop]
+                tempFlow += self.valvesObj[start].rate
+                if time >= 0:
+                    totalFlow += tempFlow * self.distances[start][stop]
+                else:
+                    totalFlow += tempFlow * (self.distances[start][stop] - time)
+                    break
+        if time > 0:
+            totalFlow += tempFlow * (time)
+        return totalFlow
+
+
+    def get_distances(self):
+        self.__prep__()
+        self.__clean_perms_and_paths__()
+        self.__reset_valves__()
+        self.__eval_segments__()
+        self.__lex_ord__()
+
+        while(self.permsFlag):
+            pass
 
         return self
 
-    def __gen_permutations__(self):   #Fill up self.permutations with 1000 new permutations.
-        # i = 1
-        t1 = time.time()
-        if self.permutations == []:
-            # print(self.nonZeroRate)
-            self.__lex_ord__()
-            self.permutations.append(self.nonZeroRate)
-            # print(self.permutations)
-        if len(self.permutations) > 0:
-            while len(self.permutations) < self.batchSize:
-                # i += 1
-                # print(i)
-                if self.permsFlag:
-                    listToPermute = self.permutations[-1].copy()
-                    self.__permute__(listToPermute)
+    #def __gen_permutations__(self):   #Fill up self.permutations with 1000 new permutations.
+    #    # i = 1
+    #    t1 = time.time()
+    #    if self.permutations == []:
+    #        # print(self.nonZeroRate)
+    #        self.__lex_ord__()
+    #        self.permutations.append(self.nonZeroRate)
+    #        # print(self.permutations)
+    #    if len(self.permutations) > 0:
+    #        while len(self.permutations) < self.batchSize:
+    #            # i += 1
+    #            # print(i)
+    #            if self.permsFlag:
+    #                listToPermute = self.permutations[-1].copy()
+    #                self.__permute__(listToPermute)
                     
-                    # print(len(self.permutations)) if len(self.permutations) % 100 == 0 else 0
-                else:
-                    break
-        if type(self.permutations[-1]) == bool:
-            self.permutations.pop(-1)
-        # print(self.permutations[0], self.permutations[-1])
-        # print(len(self.permutations))
-        # print("//////")
+    #                # print(len(self.permutations)) if len(self.permutations) % 100 == 0 else 0
+    #            else:
+    #                break
+    #    if type(self.permutations[-1]) == bool:
+    #        self.permutations.pop(-1)
+    #    # print(self.permutations[0], self.permutations[-1])
+    #    # print(len(self.permutations))
+    #    # print("//////")
+    #    t2 = time.time()
+    #    # print(t2 - t1)
+    #    return self
+
+    def __permute__(self, listToPermute = [1, 2, 3, 4]):
+        t1 = time.time()
+        for idx in range(len(listToPermute) - 1, -1, -1):
+            if idx - 1 == -1:
+                self.permsFlag = False
+                return self.permsFlag
+            if listToPermute[idx - 1] < listToPermute[idx]:
+                idxToSwap1 = idx - 1
+                valToSwap1 = listToPermute[idxToSwap1]
+                break
+        for idx in range(len(listToPermute) - 1, idxToSwap1, -1):
+            if listToPermute[idx] > listToPermute[idxToSwap1]:
+                idxToSwap2 = idx
+                valToSwap2 = listToPermute[idxToSwap2]
+                break
+        
+        listToPermute[idxToSwap1] = valToSwap2
+        listToPermute[idxToSwap2] = valToSwap1
+        listToPermute[idxToSwap1 + 1 : ] = listToPermute[ : idxToSwap1 : -1]
+        # print(listToPermute)
+        #self.permutations.append(listToPermute)
+        # print(self.permutations[0] != self.permutations[-1])
+        # print(self.permutations[-1], len(self.permutations))
         t2 = time.time()
         # print(t2 - t1)
         return self
