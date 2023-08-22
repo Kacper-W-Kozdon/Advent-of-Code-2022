@@ -50,12 +50,13 @@ class Valves(Valve):
         self.flows = []
         self.lastFlow = 0
         self.totalFlow = 0
-        self.solution1 = 0
+        self.bestPath = []
         self.distances = {}
         self.permsFlag = True
         
         
-     def __preprocess1__(self, test = 0):
+        
+    def __preprocess1__(self, test = 0):
          self.nonZeroRate = []
          self.valves = []
          for line in self.raw:
@@ -99,7 +100,8 @@ class Valves(Valve):
             del val
             # self.valvesObj.append(myVars[valve[0]])
             self.valvesObj[valve[0]] = myVars[valve[0]]
-        
+        vars().update(myVars)
+
         # print(myVars)
         # print(myVars["AA"].to)
         # print("AA" in vars().keys())
@@ -114,8 +116,8 @@ class Valves(Valve):
     
     def __eval_segments__(self):
         for start in self.nonZeroRate:
-            for stop in self.nonZeroRate:
-                self.__shortest_path__(start = start, stop = stop)
+            for end in self.nonZeroRate:
+                self.__shortest_path__(start = start, end = end)
         return self
 
     def __shortest_path__(self, start = "AA", end = "AA", test = 0):
@@ -126,6 +128,7 @@ class Valves(Valve):
         starts = [start]
         oldPath = []
         nextStarts = starts
+        keyFlag = False
         # print(len(starts))
         # print(myVars)
         while not endFound:   
@@ -143,8 +146,13 @@ class Valves(Valve):
                         if path[-1] == start:
                             oldPath = self.paths.pop(pathIdx)
                             self.paths = oldPath
-                            if not self.distances[str(oldPath[0])]:
+                            try:
+                                self.distances[str(oldPath[0])]
+                            except KeyError:
+                                keyFlag = False
+                            if not keyFlag:
                                 self.distances[str(oldPath[0])] = {str(oldPath[-1]): len(oldPath)}
+                                keyFlag = True
                             else:
                                 self.distances[str(oldPath[0])].update({str(oldPath[-1]): len(oldPath)})
                             break
@@ -171,6 +179,7 @@ class Valves(Valve):
         t2 = time.time()
         # print(t2 - t1)
         return self  
+
     def __eval_path__(self):
         time = self.totalTime
         tempFlow = 0
@@ -193,17 +202,7 @@ class Valves(Valve):
         return totalFlow
 
 
-    def get_distances(self):
-        self.__prep__()
-        self.__clean_perms_and_paths__()
-        self.__reset_valves__()
-        self.__eval_segments__()
-        self.__lex_ord__()
 
-        while(self.permsFlag):
-            pass
-
-        return self
 
     #def __gen_permutations__(self):   #Fill up self.permutations with 1000 new permutations.
     #    # i = 1
@@ -252,7 +251,7 @@ class Valves(Valve):
         listToPermute[idxToSwap1] = valToSwap2
         listToPermute[idxToSwap2] = valToSwap1
         listToPermute[idxToSwap1 + 1 : ] = listToPermute[ : idxToSwap1 : -1]
-        # print(listToPermute)
+        #print(listToPermute)
         #self.permutations.append(listToPermute)
         # print(self.permutations[0] != self.permutations[-1])
         # print(self.permutations[-1], len(self.permutations))
@@ -278,18 +277,45 @@ class Valves(Valve):
         self.nonZeroRate.sort()
         self.permsFlag = True
         return self
+
+    def get_distances(self):
+        self.__prep__()
+        self.__clean_perms_and_paths__()
+        self.__reset_valves__()
+        self.__eval_segments__()
+        self.__lex_ord__()
+
+        while(self.permsFlag):
+            self.__permute__(listToPermute = self.nonZeroRate)
+            self.lastFlow = self.__eval_path__()
+            if self.lastFlow > self.totalFlow:
+                self.totalFlow = self.lastFlow
+                self.bestPath = self.nonZeroRate
+        return self
+
+    def test_run(self):
+        self.__prep__()
+        listToPermute = [1, 2, 3, 4]
+        while(self.permsFlag):
+            self.__permute__(listToPermute = listToPermute)
+        
+        self.__clean_perms_and_paths__()
+        self.__reset_valves__()
+        self.__eval_segments__()
+        print(self.distances)
+        return self
     
 def run():
     valves = Valves()
-    print("TEST", valves.totalTime)
+    #print("TEST", valves.totalTime)
+    valves.test_run()
+
+    print(myVars)
+    #print(vars()["valves"].valvesObj)
 
     print()
     print()
 
-    print()
-    print()
 
-        
-        
 print(run())
     
