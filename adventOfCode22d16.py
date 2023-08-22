@@ -5,6 +5,7 @@ Created on Fri Mar 24 22:05:20 2023
 @author: xBubblex
 """
 
+from hashlib import new
 import time
 import re
 import numpy as np
@@ -154,26 +155,29 @@ class Valves(Valve):
                                 self.distances[str(oldPath[0])] = {str(oldPath[-1]): len(oldPath)}
                                 keyFlag = True
                             else:
-                                self.distances[str(oldPath[0])].update({str(oldPath[-1]): len(oldPath)})
+                                self.distances[str(oldPath[0])] = self.distances[str(oldPath[0])].update({str(oldPath[-1]): len(oldPath)})
                             break
-                    break
+                    
                 else:
                     pass
-                    # print(myVars[start].to)
+                    #print(myVars[start].to)
+                    print(self.paths)
                     for elem in myVars[start].to:
                         # print(elem)
                         if elem not in nextStarts:
                             nextStarts += [elem]
                     # print(len(nextStarts))
                     for pathIdx, path in enumerate(self.paths):   # <----- THIS PROBABLY CAN BE DONE MUCH BETTER.
+                        
                         if path[-1] == start:
                             oldPath = self.paths.pop(pathIdx)
                             oldPath += ["TEMP"]
                             break
                     for strt in myVars[start].to:
                         newPath = oldPath.copy()
-                        newPath[-1] = strt
-                        self.paths.append(newPath)
+                        if strt not in newPath:
+                            newPath[-1] = strt
+                            self.paths.append(newPath)
             pass
         # print(self.paths)
         t2 = time.time()
@@ -189,7 +193,9 @@ class Valves(Valve):
                 pass
             else:
                 stop = self.nonZeroRate[idx]
+                print(stop)
                 start = self.nonZeroRate[idx - 1]
+                print(start)
                 time += - self.distances[start][stop]
                 tempFlow += self.valvesObj[start].rate
                 if time >= 0:
@@ -295,13 +301,20 @@ class Valves(Valve):
 
     def test_run(self):
         self.__prep__()
-        listToPermute = [1, 2, 3, 4]
-        while(self.permsFlag):
-            self.__permute__(listToPermute = listToPermute)
-        
         self.__clean_perms_and_paths__()
         self.__reset_valves__()
         self.__eval_segments__()
+        self.__lex_ord__()
+        print(self.distances)
+
+        while(self.permsFlag):
+            
+            self.lastFlow = self.__eval_path__()
+            if self.lastFlow > self.totalFlow:
+                self.totalFlow = self.lastFlow
+                self.bestPath = self.nonZeroRate
+                print(self.totalFlow)
+            self.__permute__(listToPermute = self.nonZeroRate)
         print(self.distances)
         return self
     
