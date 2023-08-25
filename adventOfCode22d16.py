@@ -119,6 +119,8 @@ class Valves(Valve):
         for start in self.nonZeroRate:
             for end in self.nonZeroRate:
                 self.__shortest_path__(start = start, end = end)
+                #if end == "HH" or end == "GG":
+                    #print(self.distances)
         return self
 
     def __shortest_path__(self, start = "AA", end = "AA", test = 0):
@@ -142,26 +144,34 @@ class Valves(Valve):
                 pass
                 # print(starts)
                 if end in myVars[start].to:
+                    if end == "HH":
+                        print("\n\nFound 'HH'\n\n")
                     endFound = True
                     for pathIdx, path in enumerate(self.paths):
+                        if end == "HH":
+                            print(path)
+                        #print(self.distances)
                         if path[-1] == start:
                             oldPath = self.paths.pop(pathIdx)
-                            self.paths = oldPath
+                            oldPath.append(end)
+                            #print(str(oldPath[-1]))
+                            #self.paths = oldPath
                             try:
-                                self.distances[str(oldPath[0])]
+                                #print(self.distances[str(oldPath[0])])
+                                self.distances[str(oldPath[0])].update({str(oldPath[-1]): len(oldPath)})
+                                #print(self.distances[str(oldPath[0])])
+
                             except KeyError:
-                                keyFlag = False
-                            if not keyFlag:
                                 self.distances[str(oldPath[0])] = {str(oldPath[-1]): len(oldPath)}
-                                keyFlag = True
-                            else:
-                                self.distances[str(oldPath[0])] = self.distances[str(oldPath[0])].update({str(oldPath[-1]): len(oldPath)})
-                            break
+                                #print(self.distances) 
+                                
+                                             
+                            #break
                     
                 else:
                     pass
                     #print(myVars[start].to)
-                    print(self.paths)
+                    #print(self.paths)
                     for elem in myVars[start].to:
                         # print(elem)
                         if elem not in nextStarts:
@@ -193,9 +203,9 @@ class Valves(Valve):
                 pass
             else:
                 stop = self.nonZeroRate[idx]
-                print(stop)
+                #print(stop)
                 start = self.nonZeroRate[idx - 1]
-                print(start)
+                #print(start)
                 time += - self.distances[start][stop]
                 tempFlow += self.valvesObj[start].rate
                 if time >= 0:
@@ -323,7 +333,7 @@ def run():
     #print("TEST", valves.totalTime)
     valves.test_run()
 
-    print(myVars)
+    #print(myVars)
     #print(vars()["valves"].valvesObj)
 
     print()
