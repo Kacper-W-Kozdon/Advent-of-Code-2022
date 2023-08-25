@@ -129,37 +129,54 @@ class Valves(Valve):
         endFound = False
         self.paths = [[start]]
         starts = [start]
+        inputStart = start
         oldPath = []
         nextStarts = starts
         keyFlag = False
         # print(len(starts))
         # print(myVars)
+        if start == end:
+            endFound = True
+            oldPath = [start]
+            try:
+                #print(self.distances[str(oldPath[0])])
+                self.distances[str(oldPath[0])].update({str(oldPath[-1]): len(oldPath)})
+                #print(self.distances[str(oldPath[0])])
+
+            except KeyError:
+                self.distances[str(oldPath[0])] = {str(oldPath[-1]): len(oldPath)}
+                #print(self.distances) 
+                                
         while not endFound:   
             starts = nextStarts
             del nextStarts
             nextStarts = []
+            #print(starts)
             # print(len(starts))   # <----- PROBLEM!
             for start in starts:
+                #print(start)
                 
                 pass
                 # print(starts)
                 if end in myVars[start].to:
-                    if end == "HH":
+                    if end == "HH" and inputStart == "BB":
                         print("\n\nFound 'HH'\n\n")
                     endFound = True
                     for pathIdx, path in enumerate(self.paths):
-                        if end == "HH":
-                            print(path)
+                        
                         #print(self.distances)
                         if path[-1] == start:
                             oldPath = self.paths.pop(pathIdx)
                             oldPath.append(end)
+                            if end == "HH" and inputStart == "BB":
+                                print("path: ", path)
                             #print(str(oldPath[-1]))
                             #self.paths = oldPath
                             try:
                                 #print(self.distances[str(oldPath[0])])
                                 self.distances[str(oldPath[0])].update({str(oldPath[-1]): len(oldPath)})
-                                #print(self.distances[str(oldPath[0])])
+                                if end == "HH" and inputStart == "BB":
+                                    print(self.distances[str(oldPath[0])])
 
                             except KeyError:
                                 self.distances[str(oldPath[0])] = {str(oldPath[-1]): len(oldPath)}
@@ -177,17 +194,28 @@ class Valves(Valve):
                         if elem not in nextStarts:
                             nextStarts += [elem]
                     # print(len(nextStarts))
+                    paths = self.paths
                     for pathIdx, path in enumerate(self.paths):   # <----- THIS PROBABLY CAN BE DONE MUCH BETTER.
                         
                         if path[-1] == start:
-                            oldPath = self.paths.pop(pathIdx)
-                            oldPath += ["TEMP"]
-                            break
-                    for strt in myVars[start].to:
-                        newPath = oldPath.copy()
-                        if strt not in newPath:
-                            newPath[-1] = strt
-                            self.paths.append(newPath)
+                            
+                            
+                            if any([strt not in path for strt in myVars[start].to]):
+                                oldPath = paths.pop(pathIdx)
+                                oldPath += ["TEMP"]
+                                #print("\n\n\n")
+                                for strt in myVars[start].to:
+                                    if strt not in oldPath:
+                                        newPath = oldPath.copy()
+                                        newPath[-1] = strt
+                                        paths.append(newPath)
+                                        #print(newPath, strt)
+                                #print("p1: ", paths)
+                            
+                    self.paths = paths
+                    #print(inputStart, end, self.paths, "\n")
+                        
+                        
             pass
         # print(self.paths)
         t2 = time.time()
@@ -199,22 +227,39 @@ class Valves(Valve):
         tempFlow = 0
         totalFlow = 0
         for idx, _ in enumerate(self.nonZeroRate):
-            if idx == 0:
-                pass
+            if idx == 0 and self.nonZeroRate[0] == "AA":
+                time += -1
+                stop = self.nonZeroRate[idx]
+                tempFlow += self.valvesObj[stop].rate
+            elif idx == 0 and not self.nonZeroRate[0] == "AA":
+                stop = "AA"
+                start = self.nonZeroRate[idx]
+                tempFlow += self.valvesObj[start].rate
+                
+                time += - (self.distances[start][stop] + 1)
+                totalFlow += tempFlow * (self.distances[start][stop] + 1)
+                tempFlow += self.valvesObj[stop].rate
+
             else:
                 stop = self.nonZeroRate[idx]
                 #print(stop)
                 start = self.nonZeroRate[idx - 1]
                 #print(start)
-                time += - self.distances[start][stop]
-                tempFlow += self.valvesObj[start].rate
+                time += - (self.distances[start][stop] + 1)
                 if time >= 0:
-                    totalFlow += tempFlow * self.distances[start][stop]
+                    totalFlow += tempFlow * (self.distances[start][stop] + 1)
                 else:
                     totalFlow += tempFlow * (self.distances[start][stop] - time)
+                    tempFlow += self.valvesObj[stop].rate
                     break
+                
+                tempFlow += self.valvesObj[stop].rate
+                
+        
+        #tempFlow += self.valvesObj[stop].rate
         if time > 0:
-            totalFlow += tempFlow * (time)
+            totalFlow += tempFlow * (time - 1)
+        
         return totalFlow
 
 
