@@ -16,7 +16,7 @@ import itertools
 
 def load_files():
     fContent = []
-    with open("inputtest.txt") as f:
+    with open("input16.txt") as f:
         
         for (lineIndex, line) in enumerate(f):  #loading the file into an np.array
             if bool(line) and line != "\n":
@@ -344,12 +344,20 @@ class Valves(Valve):
         self.__clean_perms_and_paths__()
         self.__reset_valves__()
         self.__eval_segments__()
+        print(self.distances)
         self.__lex_ord__()
+        idx = 0
+        total = np.math.factorial(len(self.nonZeroRate))
         #print(self.distances)
-
+        t1 = time.time()
         while(self.permsFlag):
             
             self.lastFlow = self.__eval_path__()
+            idx += 1
+            t2 = time.time()
+            if t2 - t1 >= 30:
+                print(idx/total)
+                t1 = t2
             if self.lastFlow > self.totalFlow:
                 self.totalFlow = self.lastFlow
                 self.bestPath = self.nonZeroRate
