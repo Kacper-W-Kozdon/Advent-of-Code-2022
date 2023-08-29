@@ -271,12 +271,45 @@ class Valves(Valve):
             #1. check if any([valve in segment for valve in self.nonZeroRate])
             #2. if point 1 is True, for each such valve check if (time - self.distances[start][valve]) * self.valvesObj[valve].rate > (time - self.distances[start][stop]) * self.valvesObj[stop].rate
             #3. if yes, insert valve as the new stop and repeat.
+            
             pass
 
         return totalFlow
 
 
+    def __find_opt__(self, start, stop, time):
+        remainingTime = time
+        bestResult = 0
+        flows = []
+        pathSegment = []
+        path = self.shortestPaths[start][stop]
+        candidates = [valve in self.shortestPaths[start][stop] for valve in self.nonZeroRate]
+        numValves = sum(candidates) - 2
+        if numValves > 0:
+            valvesSequences = itertools.combinations_with_replacement([0, 1], numValves)
 
+            for sequence in valvesSequences:
+                flow = 0
+                for idxValve, valve in enumerate(candidates):
+                    remainingTime += -(path.index(valve) + sequence[idxValve])
+                    flow += remainingTime * sequence[idxValve] * self.valvesObs[valve].rate
+                remainingTime = time - sum([sequence]) - len(path)
+                flow += remainingTime * self.valvesObj[stop].rate
+                flows.append(flow)
+
+                
+                pass
+            if flows:
+                bestResult = max(flows)
+                idxBest = flows.index(bestResult)
+                sequence = valvesSequences[idxBest]
+                for idxValve, valve in enumerate(sequence):
+                    if valve:
+                        pathSegment.append(candidates[idxValve])
+
+        return pathSegment, bestResult
+
+        pass
 
     #def __gen_permutations__(self):   #Fill up self.permutations with 1000 new permutations.
     #    # i = 1
@@ -348,7 +381,7 @@ class Valves(Valve):
         return self
     
     def __lex_ord__(self, k = 0):   #Orders rates lexicographically.
-        if no k:
+        if not k:
             self.nonZeroRate.sort()
             self.permsFlag = True
         if k == "rate":
