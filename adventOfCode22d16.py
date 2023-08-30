@@ -271,19 +271,48 @@ class Valves(Valve):
             #1. check if any([valve in segment for valve in self.nonZeroRate])
             #2. if point 1 is True, for each such valve check if (time - self.distances[start][valve]) * self.valvesObj[valve].rate > (time - self.distances[start][stop]) * self.valvesObj[stop].rate
             #3. if yes, insert valve as the new stop and repeat.
+            nonZeroRate = self.nonZeroRate
+            switchedValves = []
             
+            for idx, valve in enumerate(self.nonZeroRate):
+
+                if idx == 0:
+                    start = "AA"
+                else:
+                    start = self.nonZeroRate[idx - 1]
+                stop = self.nonZeroRate[idx]
+                pathSegment, bestResult, time = self.__find_opt__(self, start, stop, time)
+                totalFlow += bestResult
+                for valve in pathSegment:
+                    if valve not in switchedValves:
+                        switchedValves.append(valve)
+                        nonZeroRate.pop(nonZeroRate.index(valve))
+                        nonZeroRate.insert(nonZeroRate.index(stop), valve)
+                switchedValves.append(stop)
+
+            self.nonZeroRate = nonZeroRate
+            if time > 0:
+                start = self.nonZeroRate[-1]
+                tempFlow = self.valvesObj[start].rate
+                totalFlow += tempFlow * time
+                
+                    
             pass
 
         return totalFlow
 
 
     def __find_opt__(self, start, stop, time):
+        #Need to try something similar but for the entire path: collect the nodes passed on the ordered way, then find all permutations of those extra nodes.
+
         remainingTime = time
         bestResult = 0
         flows = []
         pathSegment = []
         path = self.shortestPaths[start][stop]
         candidates = [valve in self.shortestPaths[start][stop] for valve in self.nonZeroRate]
+        candidates.pop(candidates.index(start))
+        candidates.pop(candidates.index(stop))
         numValves = sum(candidates) - 2
         if numValves > 0:
             valvesSequences = itertools.combinations_with_replacement([0, 1], numValves)
@@ -307,7 +336,9 @@ class Valves(Valve):
                     if valve:
                         pathSegment.append(candidates[idxValve])
 
-        return pathSegment, bestResult
+            remainingTime += - self.distances[start][stop] - len(pathSegment) 
+
+        return pathSegment, bestResult, remainingTime
 
         pass
 
