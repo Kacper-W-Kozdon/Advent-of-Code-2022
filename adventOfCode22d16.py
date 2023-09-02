@@ -230,7 +230,7 @@ class Valves(Valve):
         return self  
 
     def __eval_path__(self, k = 0):
-        time = self.totalTime
+        time = self.totalTime 
         tempFlow = 0
         totalFlow = 0
         start = "AA"
@@ -290,14 +290,15 @@ class Valves(Valve):
                         switchedValves.append(valve)
                         nonZeroRate.pop(nonZeroRate.index(valve))
                         nonZeroRate.insert(nonZeroRate.index(stop), valve)
+                print(nonZeroRate)
                 switchedValves.append(stop)
 
             self.nonZeroRate = nonZeroRate
             print(time)
             if time > 0:
-                start = self.nonZeroRate[-1]
-                tempFlow = self.valvesObj[start].rate
-                totalFlow += tempFlow * time
+                #start = self.nonZeroRate[-1]
+                #tempFlow = self.valvesObj[stop].rate
+                #totalFlow += tempFlow * time
                 print("total: ", totalFlow)
                     
             pass
@@ -329,14 +330,15 @@ class Valves(Valve):
         numValves = len(candidates)
         #print("numValves: ", numValves, "   candidates: ", candidates, "    start:stop: ", start, stop)
         if numValves == 0:
-            tempFlow = self.valvesObj[stop].rate
             
-            if time > 0:
+            tempFlow = self.valvesObj[stop].rate
+            remainingTime += - (self.distances[start][stop])
+            if remainingTime > 0:
                 bestResult += tempFlow * remainingTime 
             else:
                 bestResult += tempFlow * (remainingTime + (self.distances[start][stop]))
 
-            remainingTime += - (self.distances[start][stop])
+            
             print("Remaining time: ", remainingTime)
             return pathSegment, bestResult, remainingTime
 
@@ -350,11 +352,12 @@ class Valves(Valve):
                 #print("Sequence: ", sequence)
                 flow = 0
                 for idxValve, valve in enumerate(candidates):
-                    remainingTime += -(path.index(valve) + sum(sequence[: idxValve]))
+                    remainingTime += -(path.index(valve) + 1 - sum(sequence[: idxValve]))
                     flow += remainingTime * sequence[idxValve] * self.valvesObj[valve].rate
+                    
                     remainingTime = time
-                remainingTime = time - sum(sequence) - len(path)
-                flow += remainingTime * self.valvesObj[stop].rate
+                remainingTime = time - sum(sequence) - self.distances[start][stop]
+                flow += (remainingTime) * self.valvesObj[stop].rate
                 #print("Flow: ", flow)
                 flows.append(flow)
 
@@ -364,8 +367,9 @@ class Valves(Valve):
             if flows:
                 bestResult = max(flows)
                 idxBest = flows.index(bestResult)
-                sequence = valvesSequences[idxBest]
+                sequence = list(valvesSequences[idxBest])
                 for idxValve, valve in enumerate(sequence):
+                    #print(idxValve, valve, candidates)
                     if valve:
                         pathSegment.append(candidates[idxValve])
             print("Segment: ", pathSegment, self.distances[start][stop], len(pathSegment), "remaining time: ", remainingTime)
@@ -459,10 +463,11 @@ class Valves(Valve):
         self.__clean_perms_and_paths__()
         self.__reset_valves__()
         self.__eval_segments__()
-        print(self.distances)
+        #print(self.distances)
+        print(self.nonZeroRate)
         print()
         print()
-        print(self.shortestPaths)
+        #print(self.shortestPaths)
         self.__lex_ord__()
         idx = 0
         total = np.math.factorial(len(self.nonZeroRate))
@@ -490,18 +495,19 @@ class Valves(Valve):
         self.__clean_perms_and_paths__()
         self.__reset_valves__()
         self.__eval_segments__()
-        print(self.distances)
+        #print(self.distances)
         print()
         print()
-        print(self.shortestPaths)
+        #print(self.shortestPaths)
         self.__lex_ord__(k = "rate")
+        print(self.nonZeroRate)
         
         #print(self.distances)
         
         
             
-        self.lastFlow = self.__eval_path__(k = "rate")
-        print(self.lastFlow)
+        self.totalFlow = self.__eval_path__(k = "rate")
+        print(self.totalFlow)
             
         self.solution1 = self.totalFlow
         print("Total flow: ", self.solution1)
@@ -514,6 +520,7 @@ def run():
     valves = Valves()
     #print("TEST", valves.totalTime)
     valves.get_distances2()
+    #print(valves.bestPath)
 
     #print(myVars)
     #print(vars()["valves"].valvesObj)
