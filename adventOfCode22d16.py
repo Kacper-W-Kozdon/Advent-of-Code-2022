@@ -281,8 +281,10 @@ class Valves(Valve):
                 else:
                     start = self.nonZeroRate[idx - 1]
                 stop = self.nonZeroRate[idx]
-                pathSegment, bestResult, time = self.__find_opt__(self, start, stop, time)
+                
+                pathSegment, bestResult, time = self.__find_opt__(start, stop, time)
                 totalFlow += bestResult
+                print("best result: ", bestResult, "total: ", totalFlow)
                 for valve in pathSegment:
                     if valve not in switchedValves:
                         switchedValves.append(valve)
@@ -291,11 +293,12 @@ class Valves(Valve):
                 switchedValves.append(stop)
 
             self.nonZeroRate = nonZeroRate
+            print(time)
             if time > 0:
                 start = self.nonZeroRate[-1]
                 tempFlow = self.valvesObj[start].rate
                 totalFlow += tempFlow * time
-                
+                print("total: ", totalFlow)
                     
             pass
 
@@ -310,24 +313,54 @@ class Valves(Valve):
         flows = []
         pathSegment = []
         path = self.shortestPaths[start][stop]
-        candidates = [valve in self.shortestPaths[start][stop] for valve in self.nonZeroRate]
-        candidates.pop(candidates.index(start))
-        candidates.pop(candidates.index(stop))
-        numValves = sum(candidates) - 2
-        if numValves > 0:
-            valvesSequences = itertools.combinations_with_replacement([0, 1], numValves)
+        candidates = [(valve in self.shortestPaths[start][stop]) * valve for valve in self.nonZeroRate]
+        while "" in candidates:
+            candidates.pop(candidates.index(""))
+        #print(candidates, start, stop)
 
+        try:
+            candidates.pop(candidates.index(start))
+        except:
+            pass
+        try:
+            candidates.pop(candidates.index(stop))
+        except:
+            pass
+        numValves = len(candidates)
+        #print("numValves: ", numValves, "   candidates: ", candidates, "    start:stop: ", start, stop)
+        if numValves == 0:
+            tempFlow = self.valvesObj[stop].rate
+            
+            if time > 0:
+                bestResult += tempFlow * remainingTime 
+            else:
+                bestResult += tempFlow * (remainingTime + (self.distances[start][stop]))
+
+            remainingTime += - (self.distances[start][stop])
+            print("Remaining time: ", remainingTime)
+            return pathSegment, bestResult, remainingTime
+
+        if numValves > 0:
+            valvesSequences = list(itertools.combinations_with_replacement([0, 1], numValves))
+            
+            #print(list(valvesSequences))
             for sequence in valvesSequences:
+                sequence = list(sequence)
+
+                #print("Sequence: ", sequence)
                 flow = 0
                 for idxValve, valve in enumerate(candidates):
-                    remainingTime += -(path.index(valve) + sequence[idxValve])
-                    flow += remainingTime * sequence[idxValve] * self.valvesObs[valve].rate
-                remainingTime = time - sum([sequence]) - len(path)
+                    remainingTime += -(path.index(valve) + sum(sequence[: idxValve]))
+                    flow += remainingTime * sequence[idxValve] * self.valvesObj[valve].rate
+                    remainingTime = time
+                remainingTime = time - sum(sequence) - len(path)
                 flow += remainingTime * self.valvesObj[stop].rate
+                #print("Flow: ", flow)
                 flows.append(flow)
 
                 
                 pass
+            #print("Flows: ", flows)
             if flows:
                 bestResult = max(flows)
                 idxBest = flows.index(bestResult)
@@ -335,9 +368,9 @@ class Valves(Valve):
                 for idxValve, valve in enumerate(sequence):
                     if valve:
                         pathSegment.append(candidates[idxValve])
-
-            remainingTime += - self.distances[start][stop] - len(pathSegment) 
-
+            print("Segment: ", pathSegment, self.distances[start][stop], len(pathSegment), "remaining time: ", remainingTime)
+            remainingTime = time - self.distances[start][stop] - len(pathSegment) 
+        #print("best result: ", bestResult)
         return pathSegment, bestResult, remainingTime
 
         pass
@@ -468,6 +501,7 @@ class Valves(Valve):
         
             
         self.lastFlow = self.__eval_path__(k = "rate")
+        print(self.lastFlow)
             
         self.solution1 = self.totalFlow
         print("Total flow: ", self.solution1)
@@ -479,7 +513,7 @@ class Valves(Valve):
 def run():
     valves = Valves()
     #print("TEST", valves.totalTime)
-    valves.get_distances1()
+    valves.get_distances2()
 
     #print(myVars)
     #print(vars()["valves"].valvesObj)
