@@ -477,7 +477,8 @@ class Valves(Valve):
             self.permsFlag = True
         if k == "rate":
             print("inputList: ", inputList, "    start: ", start, "    startIdx: ", startIdx)
-            inputList.sort(key = lambda x: self.__find_opt__(start, x, time = timeRemaining, switchedValves = self.switchedValves, ordering = 1))
+            #inputList.sort(key = lambda x: self.__find_opt__(start, x, time = timeRemaining, switchedValves = self.switchedValves, ordering = 1))
+            inputList.sort(key = lambda x: (timeRemaining - self.distances[start][x]) * self.valvesObj[x].rate)
             foo = inputList[ : : -1]
             inputList = foo
             print("outputList: ", inputList, "    time remaining: ", timeRemaining)
@@ -558,6 +559,7 @@ def run():
     valves2 = Valves()
     valves2.get_distances()
     print(valves2.bestPath)
+    print(valves.distances["JJ"]["HH"], valves.distances["JJ"]["DD"])
     #print(myVars)
     #print(vars()["valves"].valvesObj)
 
