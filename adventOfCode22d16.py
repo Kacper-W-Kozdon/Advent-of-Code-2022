@@ -55,6 +55,7 @@ class Valves(Valve):
         self.distances = {}
         self.shortestPaths = {}
         self.permsFlag = True
+        self.switchedValves = []
         
         
         
@@ -281,19 +282,24 @@ class Valves(Valve):
                 else:
                     start = self.nonZeroRate[idx - 1]
                 stop = self.nonZeroRate[idx]
-                
-                pathSegment, bestResult, time = self.__find_opt__(start, stop, time)
-                totalFlow += bestResult
-                print("best result: ", bestResult, "total: ", totalFlow)
-                for valve in pathSegment:
-                    if valve not in switchedValves:
-                        switchedValves.append(valve)
-                        nonZeroRate.pop(nonZeroRate.index(valve))
-                        nonZeroRate.insert(nonZeroRate.index(stop), valve)
-                print(nonZeroRate)
-                switchedValves.append(stop)
+                if start not in switchedValves:
+                    pathSegment, bestResult, time = self.__find_opt__(start, stop, time, switchedValves)
+                    totalFlow += bestResult
+                    print("best result: ", bestResult, "total: ", totalFlow)
+                    for valve in pathSegment:
+                        if valve not in switchedValves:
+                            switchedValves.append(valve)
+                            nonZeroRate.pop(nonZeroRate.index(valve))
+                            nonZeroRate.insert(nonZeroRate.index(stop), valve)
+                    print(nonZeroRate, "switchedValves: ", switchedValves)
+                    switchedValves.append(start)
+                    self.switchedValves = switchedValves
+
+                    self.nonZeroRate = nonZeroRate
+                    self.__lex_ord__(k = "rate", timeRemaining = time, start = stop)
 
             self.nonZeroRate = nonZeroRate
+            self.bestPath = self.nonZeroRate
             print(time)
             if time > 0:
                 #start = self.nonZeroRate[-1]
@@ -306,7 +312,7 @@ class Valves(Valve):
         return totalFlow
 
 
-    def __find_opt__(self, start, stop, time):
+    def __find_opt__(self, start, stop, time, switchedValves = [], ordering = 0):
         #Need to try something similar but for the entire path: collect the nodes passed on the ordered way, then find all permutations of those extra nodes.
 
         remainingTime = time
@@ -317,6 +323,9 @@ class Valves(Valve):
         candidates = [(valve in self.shortestPaths[start][stop]) * valve for valve in self.nonZeroRate]
         while "" in candidates:
             candidates.pop(candidates.index(""))
+        for valve in switchedValves:
+            if valve in candidates:
+                candidates.pop(candidates.index(valve))
         #print(candidates, start, stop)
 
         try:
@@ -340,6 +349,9 @@ class Valves(Valve):
 
             
             print("Remaining time: ", remainingTime)
+            if ordering:                   
+                return bestResult
+
             return pathSegment, bestResult, remainingTime
 
         if numValves > 0:
@@ -375,8 +387,12 @@ class Valves(Valve):
             print("Segment: ", pathSegment, self.distances[start][stop], len(pathSegment), "remaining time: ", remainingTime)
             remainingTime = time - self.distances[start][stop] - len(pathSegment) 
         #print("best result: ", bestResult)
+        #print(bool(ordering))
+        if ordering:       
+            
+            return bestResult
+        
         return pathSegment, bestResult, remainingTime
-
         pass
 
     #def __gen_permutations__(self):   #Fill up self.permutations with 1000 new permutations.
@@ -448,19 +464,25 @@ class Valves(Valve):
             self.valvesObj[valve].on = False
         return self
     
-    def __lex_ord__(self, k = 0, inputList = self.nonZeroRate, timeRemaining = self.totalTime, start = "AA"):   #Orders rates lexicographically.
-        
+    def __lex_ord__(self, k = 0, timeRemaining = 30, start = "AA"):   #Orders rates lexicographically.
+        try:
+            startIdx = self.nonZeroRate.index(start) + 1
+        except:
+            startIdx = 0
+
+        inputList = self.nonZeroRate[startIdx : ]
+
         if not k:
             inputList.sort()
             self.permsFlag = True
         if k == "rate":
-            inputList.sort(key = lambda x: (timeRemaining - self.distances[start][x]) * self.valvesObj[x].rate)
+            print("inputList: ", inputList, "    start: ", start, "    startIdx: ", startIdx)
+            inputList.sort(key = lambda x: self.__find_opt__(start, x, time = timeRemaining, switchedValves = self.switchedValves, ordering = 1))
             foo = inputList[ : : -1]
             inputList = foo
-        if inputList == self.nonZeroRate:
-            return self
-        else:
-            return inputList
+            print("outputList: ", inputList, "    time remaining: ", timeRemaining)
+        self.nonZeroRate[startIdx : ] = inputList
+        return self
 
     def get_distances(self):
         self.__prep__()
@@ -529,8 +551,13 @@ def run():
 
 
     valves.get_distances2()
-    #print(valves.bestPath)
-
+    print(valves.bestPath)
+    print()
+    print()
+    print("Permutations check: ")
+    valves2 = Valves()
+    valves2.get_distances()
+    print(valves2.bestPath)
     #print(myVars)
     #print(vars()["valves"].valvesObj)
 
