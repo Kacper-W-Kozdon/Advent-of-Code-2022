@@ -448,15 +448,19 @@ class Valves(Valve):
             self.valvesObj[valve].on = False
         return self
     
-    def __lex_ord__(self, k = 0):   #Orders rates lexicographically.
+    def __lex_ord__(self, k = 0, inputList = self.nonZeroRate, timeRemaining = self.totalTime, start = "AA"):   #Orders rates lexicographically.
+        
         if not k:
-            self.nonZeroRate.sort()
+            inputList.sort()
             self.permsFlag = True
         if k == "rate":
-            self.nonZeroRate.sort(key = lambda x: self.valvesObj[x].rate)
-            foo = self.nonZeroRate[ : : -1]
-            self.nonZeroRate = foo
-        return self
+            inputList.sort(key = lambda x: (timeRemaining - self.distances[start][x]) * self.valvesObj[x].rate)
+            foo = inputList[ : : -1]
+            inputList = foo
+        if inputList == self.nonZeroRate:
+            return self
+        else:
+            return inputList
 
     def get_distances(self):
         self.__prep__()
@@ -499,6 +503,9 @@ class Valves(Valve):
         print()
         print()
         #print(self.shortestPaths)
+
+        #CHANGE __LEX_ORD__ TO BE BASED ON THE MAXIMUM TOTAL FLOW THE VALVE CAN PROVIDE DURING THE REMAINING TIME AND APPLY THIS IN EACH STEP FOR THE REMAINNIG VALVES.
+
         self.__lex_ord__(k = "rate")
         print(self.nonZeroRate)
         
@@ -519,6 +526,8 @@ class Valves(Valve):
 def run():
     valves = Valves()
     #print("TEST", valves.totalTime)
+
+
     valves.get_distances2()
     #print(valves.bestPath)
 
