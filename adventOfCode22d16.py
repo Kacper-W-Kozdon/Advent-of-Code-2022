@@ -55,7 +55,7 @@ class Valves(Valve):
         self.distances = {}
         self.shortestPaths = {}
         self.permsFlag = True
-        self.switchedValves = []
+        self.switchedValves = ["AA"]
         
         
         
@@ -308,6 +308,17 @@ class Valves(Valve):
                 print("total: ", totalFlow)
                     
             pass
+        
+        if k == "astar":
+            tempFlow = 0
+            for valveIdx, valve in enumerate(self.switchedValves):
+                try:
+                    self.switchedValves[valveIdx + 1]
+                except:
+                    break
+                tempFlow += self.valvesObj[valve].rate
+                self.totalFlow += tempFlow * self.distances[valve][self.switchedValves[valveIdx + 1]]
+                totalFlow = self.totalFlow
 
         return totalFlow
 
@@ -478,11 +489,39 @@ class Valves(Valve):
         if k == "rate":
             print("inputList: ", inputList, "    start: ", start, "    startIdx: ", startIdx)
             #inputList.sort(key = lambda x: self.__find_opt__(start, x, time = timeRemaining, switchedValves = self.switchedValves, ordering = 1))
-            inputList.sort(key = lambda x: (timeRemaining - self.distances[start][x]) * self.valvesObj[x].rate)
+            
+            print("outputList: ", inputList, "    time remaining: ", timeRemaining)
+        
+
+        if k == "astar":
+
+            
+            timeRemaining = self.totalTime
+            for valveIdx, valve in self.switchedValves:
+                if valveIdx == 0:
+                    pass
+                timeRemaining += -self.distances[self.switchedValves[valveIdx - 1]][valve]
+            totalFlow = self.__eval_path__(k = "astar")
+            start = self.switchedValves[-1]    
+            flowRates = [self.valvesObj[valve].rate for valve in self.switchedValves]
+
+            key = lambda x: totalFlow + (timeRemaining - self.distances[start][x]) * (self.valvesObj[x].rate + sum(flowRates))
+
+            inputList.sort(key = key)
             foo = inputList[ : : -1]
             inputList = foo
-            print("outputList: ", inputList, "    time remaining: ", timeRemaining)
+            
+
         self.nonZeroRate[startIdx : ] = inputList
+        return self
+    
+    def astar(self):
+        self.__lex_ord__(k = "astar")
+        for valveIdx in range(len(self.nonZeroRate)):
+            start = self.nonZeroRate[valveIdx]
+            self.switchedValves.append(start)
+            self.__lex_ord__(k = "astar", start = start)
+
         return self
 
     def get_distances(self):
@@ -544,9 +583,8 @@ class Valves(Valve):
         return self
     
 
-
     
-def run():
+def main():
     valves = Valves()
     #print("TEST", valves.totalTime)
 
@@ -559,7 +597,7 @@ def run():
     valves2 = Valves()
     valves2.get_distances()
     print(valves2.bestPath)
-    print(valves.distances["JJ"]["HH"], valves.distances["JJ"]["DD"])
+    #print(valves.distances["JJ"]["HH"], valves.distances["JJ"]["DD"])
     #print(myVars)
     #print(vars()["valves"].valvesObj)
 
@@ -567,5 +605,6 @@ def run():
     print()
 
 
-print(run())
+if __name__ == "__main__":
+    print(main())
     
