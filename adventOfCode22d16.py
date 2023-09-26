@@ -514,9 +514,16 @@ class Valves(Valve):
             totalFlow = self.__eval_path__(k = "astar")
             #print(totalFlow)
             start = self.switchedValves[-1]    
+            #start = "AA"
             flowRates = [self.valvesObj[valve].rate for valve in self.switchedValves]
+            remainingFlowRates = [self.valvesObj[valve].rate for valve in inputList]
+            
 
-            key = lambda x: totalFlow + (timeRemaining - self.distances[start][x]) * (self.valvesObj[x].rate + sum(flowRates))
+            #key = lambda x: totalFlow + (timeRemaining - self.distances[start][x]) * (self.valvesObj[x].rate + sum(flowRates))
+            #key = lambda x: (self.valvesObj[x].rate + sum(flowRates))/(self.distances[start][x] + self.totalTime - timeRemaining) 
+            #key = lambda x: (self.valvesObj[x].rate + sum(flowRates))/(self.distances[start][x] + self.totalTime - timeRemaining) 
+            key = lambda x: (self.valvesObj[x].rate)/self.distances[start][x] 
+            
 
             inputList.sort(key = key)
             foo = inputList[ : : -1]
