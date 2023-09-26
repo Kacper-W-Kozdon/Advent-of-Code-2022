@@ -310,15 +310,22 @@ class Valves(Valve):
             pass
         
         if k == "astar":
-            tempFlow = 0
+            timeUsed = 0
+            self.totalFlow = 0
+            if "AA" not in self.switchedValves:
+                self.switchedValves.append("AA")
+            #tempFlow = 0
             for valveIdx, valve in enumerate(self.switchedValves):
                 try:
                     self.switchedValves[valveIdx + 1]
                 except:
                     break
                 tempFlow += self.valvesObj[valve].rate
+                #print(tempFlow, self.totalFlow, self.distances[valve][self.switchedValves[valveIdx + 1]])
                 self.totalFlow += tempFlow * self.distances[valve][self.switchedValves[valveIdx + 1]]
-                totalFlow = self.totalFlow
+                timeUsed += self.distances[valve][self.switchedValves[valveIdx + 1]]
+            self.totalFlow += (self.totalTime - timeUsed) * tempFlow
+            totalFlow = self.totalFlow
 
         return totalFlow
 
@@ -494,14 +501,18 @@ class Valves(Valve):
         
 
         if k == "astar":
-
+            if "AA" not in self.switchedValves:
+                self.switchedValves.append("AA")
             
             timeRemaining = self.totalTime
-            for valveIdx, valve in self.switchedValves:
+            for valveIdx, valve in enumerate(self.switchedValves):
+                #print("ERROR: ", valveIdx, valve)
+                #print(self.distances)
                 if valveIdx == 0:
                     pass
                 timeRemaining += -self.distances[self.switchedValves[valveIdx - 1]][valve]
             totalFlow = self.__eval_path__(k = "astar")
+            #print(totalFlow)
             start = self.switchedValves[-1]    
             flowRates = [self.valvesObj[valve].rate for valve in self.switchedValves]
 
@@ -509,19 +520,27 @@ class Valves(Valve):
 
             inputList.sort(key = key)
             foo = inputList[ : : -1]
+            keyValues = [key(x) for x in inputList]
             inputList = foo
+            print(self.switchedValves, inputList, keyValues, sum(flowRates))
             
 
         self.nonZeroRate[startIdx : ] = inputList
         return self
     
     def astar(self):
+        self.__prep__()
+        self.__clean_perms_and_paths__()
+        self.__reset_valves__()
+        self.__eval_segments__()
         self.__lex_ord__(k = "astar")
+        
         for valveIdx in range(len(self.nonZeroRate)):
+            
             start = self.nonZeroRate[valveIdx]
             self.switchedValves.append(start)
             self.__lex_ord__(k = "astar", start = start)
-
+        
         return self
 
     def get_distances(self):
@@ -600,8 +619,12 @@ def main():
     #print(valves.distances["JJ"]["HH"], valves.distances["JJ"]["DD"])
     #print(myVars)
     #print(vars()["valves"].valvesObj)
-
-    print()
+    print("\n\n\nASTAR\n\n\n")
+    valves3 = Valves()
+    valves3.astar()
+    print(valves3.nonZeroRate)
+    print(valves3.switchedValves)
+    print(valves3.totalFlow)
     print()
 
 
