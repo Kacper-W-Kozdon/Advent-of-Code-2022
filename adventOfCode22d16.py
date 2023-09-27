@@ -577,6 +577,7 @@ class Valves(Valve):
                         pass
                     self.__lex_ord__(k = "astar", start = start)
             graphIn = graphOut
+            graphOut = []
         self.graph = graphIn
 
         return self
