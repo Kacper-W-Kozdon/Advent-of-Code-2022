@@ -56,6 +56,7 @@ class Valves(Valve):
         self.shortestPaths = {}
         self.permsFlag = True
         self.switchedValves = ["AA"]
+        self.graph = []
         
         
         
@@ -489,6 +490,7 @@ class Valves(Valve):
             startIdx = 0
 
         inputList = self.nonZeroRate[startIdx : ]
+        
 
         if not k:
             inputList.sort()
@@ -501,6 +503,7 @@ class Valves(Valve):
         
 
         if k == "astar":
+            inputList = list(set(self.nonZeroRate) - set(self.switchedValves))
             if "AA" not in self.switchedValves:
                 self.switchedValves.append("AA")
             
@@ -522,17 +525,18 @@ class Valves(Valve):
             #key = lambda x: totalFlow + (timeRemaining - self.distances[start][x]) * (self.valvesObj[x].rate + sum(flowRates))
             #key = lambda x: (self.valvesObj[x].rate + sum(flowRates))/(self.distances[start][x] + self.totalTime - timeRemaining) 
             #key = lambda x: (self.valvesObj[x].rate + sum(flowRates))/(self.distances[start][x] + self.totalTime - timeRemaining) 
-            key = lambda x: (self.valvesObj[x].rate)/self.distances[start][x] 
+            #key = lambda x: sum(flowRates) * self.distances[start][x] + (self.valvesObj[x].rate) * (timeRemaining - self.distances[start][x])
+            key = lambda x: sum(flowRates) * (self.distances["AA"][x]) + self.valvesObj[x].rate * (timeRemaining - self.distances["AA"][x])
             
 
             inputList.sort(key = key)
             foo = inputList[ : : -1]
-            keyValues = [key(x) for x in inputList]
+            keyValues = [(x, key(x)) for x in inputList]
             inputList = foo
-            print(self.switchedValves, inputList, keyValues, sum(flowRates))
+            #print(self.switchedValves, inputList, keyValues, sum(flowRates))
             
 
-        self.nonZeroRate[startIdx : ] = inputList
+        self.nonZeroRate = self.switchedValves + inputList
         return self
     
     def astar(self):
@@ -548,6 +552,33 @@ class Valves(Valve):
             self.switchedValves.append(start)
             self.__lex_ord__(k = "astar", start = start)
         
+        return self
+
+    def bread_first(self):
+        self.__prep__()
+        self.__clean_perms_and_paths__()
+        self.__reset_valves__()
+        self.__eval_segments__()
+        self.__lex_ord__(k = "astar")
+        self.switchedValves = ["AA"]
+        graphIn = [self.switchedValves]
+        graphOut = []
+
+        for valveIdx in range(len(self.nonZeroRate)):
+            for route in graphIn:
+                self.switchedValves = route
+                
+                for idx in range(3):
+                    try:
+                        start = self.nonZeroRate[valveIdx + idx]
+                        graphOut.append(self.switchedValves + [start])
+                        
+                    except:
+                        pass
+                    self.__lex_ord__(k = "astar", start = start)
+            graphIn = graphOut
+        self.graph = graphIn
+
         return self
 
     def get_distances(self):
