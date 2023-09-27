@@ -281,6 +281,7 @@ class Valves(Valve):
                 if idx == 0:
                     start = "AA"
                 else:
+                    print(self.nonZeroRate, idx, valve)
                     start = self.nonZeroRate[idx - 1]
                 stop = self.nonZeroRate[idx]
                 if start not in switchedValves:
@@ -503,10 +504,11 @@ class Valves(Valve):
         
 
         if k == "astar":
-            inputList = list(set(self.nonZeroRate) - set(self.switchedValves))
+            
             if "AA" not in self.switchedValves:
                 self.switchedValves.append("AA")
-            
+            inputList = list(set(self.nonZeroRate) - set(self.switchedValves))
+            #print(inputList + self.switchedValves)
             timeRemaining = self.totalTime
             for valveIdx, valve in enumerate(self.switchedValves):
                 #print("ERROR: ", valveIdx, valve)
@@ -533,10 +535,11 @@ class Valves(Valve):
             foo = inputList[ : : -1]
             keyValues = [(x, key(x)) for x in inputList]
             inputList = foo
-            #print(self.switchedValves, inputList, keyValues, sum(flowRates))
+            #print(self.nonZeroRate, self.switchedValves, inputList, keyValues, sum(flowRates))
             
-
-        self.nonZeroRate = self.switchedValves + inputList
+            #self.nonZeroRate[startIdx : ] = inputList
+            self.nonZeroRate = self.switchedValves[1 : ] + inputList
+            
         return self
     
     def astar(self):
