@@ -482,6 +482,7 @@ class Valves(Valve):
         for valve in self.valvesObj:
             # print("VALVE", valve)
             self.valvesObj[valve].on = False
+        self.switchedValves = ['AA']
         return self
     
     def __lex_ord__(self, k = 0, timeRemaining = 30, start = "AA"):   #Orders rates lexicographically.
@@ -502,7 +503,9 @@ class Valves(Valve):
             
             print("outputList: ", inputList, "    time remaining: ", timeRemaining)
         
-
+        if k == "flow":
+            self.nonZeroRate.sort(key = lambda valve: self.valvesObj[valve].rate)
+        
         if k == "astar":
             
             if "AA" not in self.switchedValves:
@@ -522,7 +525,7 @@ class Valves(Valve):
             #start = "AA"
             flowRates = [self.valvesObj[valve].rate for valve in self.switchedValves]
             remainingFlowRates = [self.valvesObj[valve].rate for valve in inputList]
-            remainingFlowRates.sort(reverse = True)
+            
             
 
             key = lambda x: (timeRemaining - self.distances[start][x]) * (self.valvesObj[x].rate) + (timeRemaining - self.distances[start][x]) * (sum(remainingFlowRates) - self.valvesObj[x].rate)
@@ -548,8 +551,16 @@ class Valves(Valve):
         self.__clean_perms_and_paths__()
         self.__reset_valves__()
         self.__eval_segments__()
+        self.__lex_ord__(k = "flow")
         self.__lex_ord__(k = "astar")
         
+        for valveIdx in range(len(self.nonZeroRate)):
+            
+            start = self.nonZeroRate[valveIdx]
+            self.switchedValves.append(start)
+            self.__lex_ord__(k = "astar", start = start)
+
+        self.__reset_valves__()
         for valveIdx in range(len(self.nonZeroRate)):
             
             start = self.nonZeroRate[valveIdx]
