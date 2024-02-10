@@ -249,19 +249,24 @@ class Valves(Valve):
                     tempFlow = self.valvesObj[start].rate
                     totalFlow += tempFlow * time
                     time += - (self.distances[start][stop])
+
                 
 
                 else:
+                    
                     tempFlow = self.valvesObj[stop].rate
-                    start = inputList[idx - 1]
-                    stop = inputList[idx]
+
                     if time > 0:
                         totalFlow += tempFlow * time 
                     else:
-                        totalFlow += tempFlow * (time + (self.distances[start][stop]) - 1)
+                        totalFlow += tempFlow * (time + (self.distances[start][stop]))
                         break
 
+                    start = inputList[idx - 1]
+                    stop = inputList[idx]
                     time += - (self.distances[start][stop])
+                    
+                    
     
         
             if time > 0:
@@ -604,7 +609,7 @@ class Valves(Valve):
             graph.pop(0)
         solution = max(self.graph, key = lambda a: self.__eval_path__(inputList = a))
         # print(self.__eval_path__(inputList = ['JJ', 'HH', 'EE', 'DD', 'CC', 'BB']))
-        print(self.__eval_path__(inputList = ['IF', 'IE', 'WQ', 'GU', 'UN', 'RQ', 'BT', 'CQ', 'MU', 'TD', 'AZ', 'FI', 'MH', 'ME', 'RU']))
+        # print(self.__eval_path__(inputList = ['IF', 'IE', 'WQ', 'GU', 'UN', 'RQ', 'BT', 'CQ', 'MU', 'TD', 'AZ', 'FI', 'MH', 'ME', 'RU']))
         self.nonZeroRate = solution
         totalTimeReq = sum([self.distances[start][stop] for start, stop in zip(solution[:-1], solution[1:])])
         print(f"Total time required: {totalTimeReq}")
