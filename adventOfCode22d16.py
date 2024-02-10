@@ -605,7 +605,7 @@ class Valves(Valve):
         solution = max(self.graph, key = lambda a: self.__eval_path__(inputList = a))
         # print(self.__eval_path__(inputList = ['JJ', 'HH', 'EE', 'DD', 'CC', 'BB']))
         # print(self.__eval_path__(inputList = ['FI', 'IF', 'TD', 'RU', 'AZ', 'MH', 'BT', 'MU', 'ME', 'IE', 'WQ', 'UN', 'RQ', 'CQ', 'GU']))
-        self.nonZeroRate = ['AA'] + solution
+        self.nonZeroRate = solution
         self.totalFlow = self.__eval_path__(inputList = solution)
         self.solution1 = self.totalFlow
         return self
