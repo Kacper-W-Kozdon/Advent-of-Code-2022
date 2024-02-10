@@ -259,7 +259,7 @@ class Valves(Valve):
                     if time > 0:
                         totalFlow += tempFlow * time 
                     else:
-                        totalFlow += tempFlow * (time + (self.distances[start][stop]))
+                        totalFlow += tempFlow * (time + (self.distances[start][stop]) - 1)
                         return totalFlow
                     
                     start = inputList[idx - 1]
