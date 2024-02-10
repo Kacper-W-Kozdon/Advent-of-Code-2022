@@ -260,7 +260,7 @@ class Valves(Valve):
                     if time > 0:
                         totalFlow += tempFlow * time 
                     else:
-                        totalFlow += tempFlow * (time + (self.distances[start][stop]))
+                        totalFlow += tempFlow * (time + (self.distances[start][stop]) - 1)
                         break
 
                     time += - (self.distances[start][stop])
@@ -585,7 +585,7 @@ class Valves(Valve):
         for valveIdx in range(len(self.nonZeroRate)):
             print(f"Step {valveIdx} out of {len(self.nonZeroRate)}. Graph size: {len(graphIn)}")
             if len(graphIn) > 5000:
-                graphIn.sort(key = lambda a: self.__eval_path__(inputList = a))
+                graphIn.sort(key = lambda a: self.__eval_path__(inputList = a), reverse = True)
                 graphIn = graphIn[ : 5002]
             for route in graphIn:
                 self.switchedValves = route
@@ -606,7 +606,7 @@ class Valves(Valve):
             graph.pop(0)
         solution = max(self.graph, key = lambda a: self.__eval_path__(inputList = a))
         # print(self.__eval_path__(inputList = ['JJ', 'HH', 'EE', 'DD', 'CC', 'BB']))
-        print(self.__eval_path__(inputList = ['FI', 'IF', 'TD', 'RU', 'AZ', 'MH', 'BT', 'MU', 'ME', 'IE', 'WQ', 'UN', 'RQ', 'CQ', 'GU']))
+        # print(self.__eval_path__(inputList = ['FI', 'IF', 'TD', 'RU', 'AZ', 'MH', 'BT', 'MU', 'ME', 'IE', 'WQ', 'UN', 'RQ', 'CQ', 'GU']))
         self.nonZeroRate = ['AA'] + solution
         self.totalFlow = self.__eval_path__(inputList = solution)
         self.solution1 = self.totalFlow
