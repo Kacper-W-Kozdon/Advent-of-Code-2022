@@ -17,7 +17,7 @@ import itertools
 
 def load_files():
     fContent = []
-    with open("inputtest.txt") as f:
+    with open("input16.txt") as f:
         
         for (lineIndex, line) in enumerate(f):  #loading the file into an np.array
             if bool(line) and line != "\n":
@@ -583,6 +583,7 @@ class Valves(Valve):
         graphOut = []
 
         for valveIdx in range(len(self.nonZeroRate)):
+            print(f"Step {valveIdx} out of {len(self.nonZeroRate)}")
             for route in graphIn:
                 self.switchedValves = route
                 
