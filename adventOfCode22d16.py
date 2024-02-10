@@ -254,14 +254,14 @@ class Valves(Valve):
 
                 else:
                     
-                    tempFlow = self.valvesObj[stop].rate
-
+                    tempFlow = self.valvesObj[stop].rate if time > 0 else tempFlow
+                    
                     if time > 0:
                         totalFlow += tempFlow * time 
                     else:
                         totalFlow += tempFlow * (time + (self.distances[start][stop]))
                         break
-
+                    
                     start = inputList[idx - 1]
                     stop = inputList[idx]
                     time += - (self.distances[start][stop])
