@@ -6,6 +6,7 @@ Created on Fri Mar 24 22:05:20 2023
 """
 
 from hashlib import new
+import math
 import time
 import re
 import numpy as np
@@ -16,7 +17,7 @@ import itertools
 
 def load_files():
     fContent = []
-    with open("input16.txt") as f:
+    with open("inputtest.txt") as f:
         
         for (lineIndex, line) in enumerate(f):  #loading the file into an np.array
             if bool(line) and line != "\n":
@@ -600,9 +601,11 @@ class Valves(Valve):
         for graph in self.graph:
             graph.pop(0)
         solution = max(self.graph, key = lambda a: self.__eval_path__(inputList = a))
-        print(self.__eval_path__(inputList = ['JJ', 'HH', 'EE', 'DD', 'CC', 'BB']))
-        print(self.__eval_path__(inputList = ['DD', 'BB', 'JJ', 'HH', 'EE', 'CC']))
+        # print(self.__eval_path__(inputList = ['JJ', 'HH', 'EE', 'DD', 'CC', 'BB']))
+        # print(self.__eval_path__(inputList = ['DD', 'BB', 'JJ', 'HH', 'EE', 'CC']))
         self.nonZeroRate = ['AA'] + solution
+        self.totalFlow = self.__eval_path__(inputList = solution)
+        self.solution1 = self.totalFlow
         return self
 
     def get_distances(self):
@@ -696,6 +699,7 @@ def main():
     print(valves4.nonZeroRate)
     #print(valves4.switchedValves)
     print(valves4.totalFlow)
+    print(len(valves4.graph), math.factorial(len(valves4.nonZeroRate) - 1))
     # print(['AA', 'BB', 'CC', 'DD', 'EE', 'HH', 'JJ'] in valves4.graph)
 
 if __name__ == "__main__":
