@@ -16,7 +16,7 @@ import itertools
 
 def load_files():
     fContent = []
-    with open("inputtest.txt") as f:
+    with open("input16.txt") as f:
         
         for (lineIndex, line) in enumerate(f):  #loading the file into an np.array
             if bool(line) and line != "\n":
@@ -231,18 +231,20 @@ class Valves(Valve):
         # print(t2 - t1)
         return self  
 
-    def __eval_path__(self, k = 0):
+    def __eval_path__(self, k = 0, inputList = []):
+        if not inputList:
+            inputList = self.nonZeroRate
         time = self.totalTime 
         tempFlow = 0
         totalFlow = 0
         start = "AA"
         stop = "AA"
         if not k:
-            for idx, _ in enumerate(self.nonZeroRate):
+            for idx, _ in enumerate(inputList):
          
                 if idx == 0: 
                     start = "AA"
-                    stop = self.nonZeroRate[idx]
+                    stop = inputList[idx]
                     tempFlow = self.valvesObj[start].rate
                     totalFlow += tempFlow * time
                     time += - (self.distances[start][stop])
@@ -250,8 +252,8 @@ class Valves(Valve):
 
                 else:
                     tempFlow = self.valvesObj[stop].rate
-                    start = self.nonZeroRate[idx - 1]
-                    stop = self.nonZeroRate[idx]
+                    start = inputList[idx - 1]
+                    stop = inputList[idx]
                          
 
                 
@@ -264,7 +266,7 @@ class Valves(Valve):
     
         
             if time > 0:
-                start = self.nonZeroRate[-1]
+                start = inputList[-1]
                 tempFlow = self.valvesObj[start].rate
                 totalFlow += tempFlow * time
         
@@ -585,6 +587,7 @@ class Valves(Valve):
                 
                 for idx in range(3):
                     try:
+                        self.__lex_ord__(k = "astar")
                         start = self.nonZeroRate[valveIdx + idx]
                         graphOut.append(self.switchedValves + [start])
                         
@@ -594,7 +597,12 @@ class Valves(Valve):
             graphIn = graphOut
             graphOut = []
         self.graph = graphIn
-
+        for graph in self.graph:
+            graph.pop(0)
+        solution = max(self.graph, key = lambda a: self.__eval_path__(inputList = a))
+        print(self.__eval_path__(inputList = ['JJ', 'HH', 'EE', 'DD', 'CC', 'BB']))
+        print(self.__eval_path__(inputList = ['DD', 'BB', 'JJ', 'HH', 'EE', 'CC']))
+        self.nonZeroRate = ['AA'] + solution
         return self
 
     def get_distances(self):
@@ -622,10 +630,12 @@ class Valves(Valve):
                 t1 = t2
             if self.lastFlow > self.totalFlow:
                 self.totalFlow = self.lastFlow
-                self.bestPath = self.nonZeroRate
+                self.bestPath = self.nonZeroRate.copy()
                 #print(self.totalFlow)
             self.__permute__(listToPermute = self.nonZeroRate)
+            print(self.bestPath)
         self.solution1 = self.totalFlow
+        print("Final path: ", self.bestPath)
         print("Total flow: ", self.solution1)
         return self
 
@@ -662,25 +672,31 @@ def main():
     #print("TEST", valves.totalTime)
 
 
-    valves.get_distances2()
-    print(valves.bestPath)
-    print()
-    print()
-    print("Permutations check: ")
-    valves2 = Valves()
-    valves2.get_distances()
-    print(valves2.bestPath)
-    #print(valves.distances["JJ"]["HH"], valves.distances["JJ"]["DD"])
-    #print(myVars)
-    #print(vars()["valves"].valvesObj)
-    print("\n\n\nASTAR\n\n\n")
-    valves3 = Valves()
-    valves3.astar()
-    print(valves3.nonZeroRate)
-    print(valves3.switchedValves)
-    print(valves3.totalFlow)
-    print()
-
+    # valves.get_distances2()
+    # print(valves.bestPath)
+    # print()
+    # print()
+    # print("Permutations check: ")
+    # valves2 = Valves()
+    # valves2.get_distances()
+    # print(valves2.bestPath)
+    # #print(valves.distances["JJ"]["HH"], valves.distances["JJ"]["DD"])
+    # #print(myVars)
+    # #print(vars()["valves"].valvesObj)
+    # print("\n\n\nASTAR\n\n\n")
+    # valves3 = Valves()
+    # valves3.astar()
+    # print(valves3.nonZeroRate)
+    # print(valves3.switchedValves)
+    # print(valves3.totalFlow)
+    # print()
+    print("\n\n\nBREAD FIRST\n\n")
+    valves4 = Valves()
+    valves4.bread_first()
+    print(valves4.nonZeroRate)
+    #print(valves4.switchedValves)
+    print(valves4.totalFlow)
+    # print(['AA', 'BB', 'CC', 'DD', 'EE', 'HH', 'JJ'] in valves4.graph)
 
 if __name__ == "__main__":
     print(main())
