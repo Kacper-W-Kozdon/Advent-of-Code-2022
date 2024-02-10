@@ -235,11 +235,13 @@ class Valves(Valve):
     def __eval_path__(self, k = 0, inputList = []):
         if not inputList:
             inputList = self.nonZeroRate
-        time = self.totalTime 
+        time = self.totalTime
         tempFlow = 0
         totalFlow = 0
         start = "AA"
         stop = "AA"
+        if "AA" in inputList:
+            inputList = inputList[1:]
         if not k:
             for idx, _ in enumerate(inputList):
          
@@ -253,16 +255,13 @@ class Valves(Valve):
 
                 else:
                     tempFlow = self.valvesObj[stop].rate
+                    start = inputList[idx - 1]
+                    stop = inputList[idx]
                     if time > 0:
                         totalFlow += tempFlow * time 
                     else:
                         totalFlow += tempFlow * (time + (self.distances[start][stop]))
-                    start = inputList[idx - 1]
-                    stop = inputList[idx]
-                         
-
-                
-                    
+                        break
 
                     time += - (self.distances[start][stop])
     
@@ -585,9 +584,9 @@ class Valves(Valve):
 
         for valveIdx in range(len(self.nonZeroRate)):
             print(f"Step {valveIdx} out of {len(self.nonZeroRate)}. Graph size: {len(graphIn)}")
-            if len(graphIn) > 1000:
+            if len(graphIn) > 5000:
                 graphIn.sort(key = lambda a: self.__eval_path__(inputList = a))
-                graphIn = graphIn[ : 1003]
+                graphIn = graphIn[ : 5002]
             for route in graphIn:
                 self.switchedValves = route
                 
