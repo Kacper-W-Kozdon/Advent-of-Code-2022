@@ -240,8 +240,6 @@ class Valves(Valve):
         totalFlow = 0
         start = "AA"
         stop = "AA"
-        if "AA" in inputList:
-            inputList = inputList[1:]
         if not k:
             for idx, _ in enumerate(inputList):
          
