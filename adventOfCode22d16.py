@@ -608,12 +608,15 @@ class Valves(Valve):
         for graph in self.graph:
             graph.pop(0)
         solution = max(self.graph, key = lambda a: self.__eval_path__(inputList = a))
-        # print(self.__eval_path__(inputList = ['JJ', 'HH', 'EE', 'DD', 'CC', 'BB']))
+        
+        sol2 = ['AA', 'IF', 'IE', 'WQ', 'GU', 'UN', 'RQ', 'BT', 'CQ', 'ME']
+        print(self.__eval_path__(inputList = sol2))
         # print(self.__eval_path__(inputList = ['IF', 'IE', 'WQ', 'GU', 'UN', 'RQ', 'BT', 'CQ', 'MU', 'TD', 'AZ', 'FI', 'MH', 'ME', 'RU']))
         solution = ["AA"] + solution
         self.nonZeroRate = solution
         totalTimeReq = sum([self.distances[start][stop] for start, stop in zip(solution[:-1], solution[1:])])
-        print(f"Total time required: {totalTimeReq}")
+        totalTimeReq2 = sum([self.distances[start][stop] for start, stop in zip(sol2[:-1], sol2[1:])])
+        print(f"Total time required: {totalTimeReq}; {totalTimeReq2}")
         self.totalFlow = self.__eval_path__(inputList = solution)
         self.solution1 = self.totalFlow
         return self
@@ -678,7 +681,6 @@ class Valves(Valve):
         print("Total flow: ", self.solution1)
         return self
     
-
     
 def main():
     valves = Valves()
