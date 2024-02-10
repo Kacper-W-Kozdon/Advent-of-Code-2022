@@ -235,7 +235,7 @@ class Valves(Valve):
     def __eval_path__(self, k = 0, inputList = []):
         if not inputList:
             inputList = self.nonZeroRate
-        time = self.totalTime
+        time = self.totalTime + 1
         tempFlow = 0
         totalFlow = 0
         start = "AA"
@@ -260,7 +260,7 @@ class Valves(Valve):
                         totalFlow += tempFlow * time 
                     else:
                         totalFlow += tempFlow * (time + (self.distances[start][stop]))
-                        break
+                        return totalFlow
                     
                     start = inputList[idx - 1]
                     stop = inputList[idx]
@@ -610,6 +610,7 @@ class Valves(Valve):
         solution = max(self.graph, key = lambda a: self.__eval_path__(inputList = a))
         # print(self.__eval_path__(inputList = ['JJ', 'HH', 'EE', 'DD', 'CC', 'BB']))
         # print(self.__eval_path__(inputList = ['IF', 'IE', 'WQ', 'GU', 'UN', 'RQ', 'BT', 'CQ', 'MU', 'TD', 'AZ', 'FI', 'MH', 'ME', 'RU']))
+        solution = ["AA"] + solution
         self.nonZeroRate = solution
         totalTimeReq = sum([self.distances[start][stop] for start, stop in zip(solution[:-1], solution[1:])])
         print(f"Total time required: {totalTimeReq}")
