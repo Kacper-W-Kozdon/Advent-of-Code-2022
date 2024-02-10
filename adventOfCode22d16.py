@@ -522,13 +522,14 @@ class Valves(Valve):
             #start = "AA"
             flowRates = [self.valvesObj[valve].rate for valve in self.switchedValves]
             remainingFlowRates = [self.valvesObj[valve].rate for valve in inputList]
+            remainingFlowRates.sort(reverse = True)
             
 
-            #key = lambda x: totalFlow + (timeRemaining - self.distances[start][x]) * (self.valvesObj[x].rate + sum(flowRates))
+            key = lambda x: totalFlow + (timeRemaining - self.distances[start][x]) * (self.valvesObj[x].rate + sum(flowRates)) + (timeRemaining - self.distances[start][x]) * (sum(remainingFlowRates) - self.valvesObj[x].rate)
             #key = lambda x: (self.valvesObj[x].rate + sum(flowRates))/(self.distances[start][x] + self.totalTime - timeRemaining) 
             #key = lambda x: (self.valvesObj[x].rate + sum(flowRates))/(self.distances[start][x] + self.totalTime - timeRemaining) 
             #key = lambda x: sum(flowRates) * self.distances[start][x] + (self.valvesObj[x].rate) * (timeRemaining - self.distances[start][x])
-            key = lambda x: sum(flowRates) * (self.distances["AA"][x]) + self.valvesObj[x].rate * (timeRemaining - self.distances["AA"][x])
+            #key = lambda x: sum(flowRates) * (self.distances["AA"][x]) + self.valvesObj[x].rate * (timeRemaining - self.distances["AA"][x])
             
 
             inputList.sort(key = key)
