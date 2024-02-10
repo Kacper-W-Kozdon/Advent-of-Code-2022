@@ -253,15 +253,16 @@ class Valves(Valve):
 
                 else:
                     tempFlow = self.valvesObj[stop].rate
+                    if time > 0:
+                        totalFlow += tempFlow * time 
+                    else:
+                        totalFlow += tempFlow * (time + (self.distances[start][stop]))
                     start = inputList[idx - 1]
                     stop = inputList[idx]
                          
 
                 
-                    if time > 0:
-                        totalFlow += tempFlow * time 
-                    else:
-                        totalFlow += tempFlow * (time + (self.distances[start][stop]))
+                    
 
                     time += - (self.distances[start][stop])
     
@@ -583,7 +584,10 @@ class Valves(Valve):
         graphOut = []
 
         for valveIdx in range(len(self.nonZeroRate)):
-            print(f"Step {valveIdx} out of {len(self.nonZeroRate)}")
+            print(f"Step {valveIdx} out of {len(self.nonZeroRate)}. Graph size: {len(graphIn)}")
+            if len(graphIn) > 1000:
+                graphIn.sort(key = lambda a: self.__eval_path__(inputList = a))
+                graphIn = graphIn[ : 1003]
             for route in graphIn:
                 self.switchedValves = route
                 
@@ -603,7 +607,7 @@ class Valves(Valve):
             graph.pop(0)
         solution = max(self.graph, key = lambda a: self.__eval_path__(inputList = a))
         # print(self.__eval_path__(inputList = ['JJ', 'HH', 'EE', 'DD', 'CC', 'BB']))
-        # print(self.__eval_path__(inputList = ['DD', 'BB', 'JJ', 'HH', 'EE', 'CC']))
+        print(self.__eval_path__(inputList = ['FI', 'IF', 'TD', 'RU', 'AZ', 'MH', 'BT', 'MU', 'ME', 'IE', 'WQ', 'UN', 'RQ', 'CQ', 'GU']))
         self.nonZeroRate = ['AA'] + solution
         self.totalFlow = self.__eval_path__(inputList = solution)
         self.solution1 = self.totalFlow
@@ -699,7 +703,7 @@ def main():
     valves4.bread_first()
     print(valves4.nonZeroRate)
     #print(valves4.switchedValves)
-    print(valves4.totalFlow)
+    print(valves4.solution1)
     print(len(valves4.graph), math.factorial(len(valves4.nonZeroRate) - 1))
     # print(['AA', 'BB', 'CC', 'DD', 'EE', 'HH', 'JJ'] in valves4.graph)
 
