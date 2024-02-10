@@ -604,8 +604,10 @@ class Valves(Valve):
             graph.pop(0)
         solution = max(self.graph, key = lambda a: self.__eval_path__(inputList = a))
         # print(self.__eval_path__(inputList = ['JJ', 'HH', 'EE', 'DD', 'CC', 'BB']))
-        # print(self.__eval_path__(inputList = ['FI', 'IF', 'TD', 'RU', 'AZ', 'MH', 'BT', 'MU', 'ME', 'IE', 'WQ', 'UN', 'RQ', 'CQ', 'GU']))
+        print(self.__eval_path__(inputList = ['IF', 'IE', 'WQ', 'GU', 'UN', 'RQ', 'BT', 'CQ', 'MU', 'TD', 'AZ', 'FI', 'MH', 'ME', 'RU']))
         self.nonZeroRate = solution
+        totalTimeReq = sum([self.distances[start][stop] for start, stop in zip(solution[:-1], solution[1:])])
+        print(f"Total time required: {totalTimeReq}")
         self.totalFlow = self.__eval_path__(inputList = solution)
         self.solution1 = self.totalFlow
         return self
