@@ -43,6 +43,7 @@ def load_files() -> list[list[str]]:
 
 @dataclass(unsafe_hash=True)
 class Valve:
+    name: str
     flow_rate: int
     paths: list[str]
     time_turned_on: int = -1
@@ -51,23 +52,27 @@ class Valve:
 @dataclass
 class Flow_State:
     current_valve: str = "AA"
-    path_taken: list = field(default_factory=list)
+    paths_taken: list = field(default_factory=list)
     total_flow: int = 0
     summed_flow: int = 0
     time_elapsed: int = 0
     distances_dict: dict[str, int] = field(default_factory=dict)
+    flow_valves: list = field(default_factory=list)
+    valves: list = field(default_factory=list)
+    time_available: int = 30
 
     def update_state(self):
         return NotImplementedError
 
     def compute_total_maximum(self) -> Union[int, type]:
+
         return NotImplementedError
 
 
 def load_valves(prep_list: list[list[str]], *args, **kwargs) -> dict[str, Valve]:
     valves: dict[str, Valve] = OrderedDict()
     for element in prep_list:
-        valves[element[0]] = Valve(int(element[1]), paths=element[2:])
+        valves[element[0]] = Valve(element[0], int(element[1]), paths=element[2:])
 
     print(f"{list(valves.keys())[:5]=}")
 
@@ -107,8 +112,10 @@ def compute_distances(valves: dict[str, Valve], *args, **kwargs) -> dict[str, in
     distances_dict: dict[str, int] = {}
     last_valve = list(valves.keys())[-1]
     num_valves = len(list(valves.keys()))
+    non_zero_flow_valves = OrderedDict({valve[0]: valve[1] for valve in valves.items() if valves[valve[0]].flow_rate > 0})
+    non_zero_flow_valves["AA"] = valves["AA"]
 
-    for start_valve_name, start_valve in valves.items():
+    for start_valve_name, start_valve in non_zero_flow_valves.items():
         if start_valve_name == last_valve:
             break
 
@@ -118,9 +125,9 @@ def compute_distances(valves: dict[str, Valve], *args, **kwargs) -> dict[str, in
             distance = pair_distance(valves, start_valve_name, end_valve_name)
             distances_dict[f"{start_valve_name}:{end_valve_name}"] = distance
 
-    print(list(distances_dict.items()))
+    # print(list(distances_dict.items()))
     print(f"{len(list(distances_dict.items()))=}")
-    print(f"{len(list(valves.items()))=}")
+    print(f"{len(list(non_zero_flow_valves.items()))=}")
     return distances_dict
 
 
@@ -132,8 +139,7 @@ def main() -> None:
 
     valves_list = list(valves.items())
     valves_num = len(valves_list)
-
-    non_zero_flow_valves = [valve[0] for valve in valves.items() if valves[valve[0]].flow_rate > 0]
+    non_zero_flow_valves = OrderedDict({valve[0]: valve[1] for valve in valves.items() if valves[valve[0]].flow_rate > 0})
     print(f"{non_zero_flow_valves=}")
     distances_dict = compute_distances(valves)
 
