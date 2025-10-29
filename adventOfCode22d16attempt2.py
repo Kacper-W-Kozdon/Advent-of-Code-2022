@@ -139,8 +139,7 @@ def main() -> None:
 
     valves_list = list(valves.items())
     valves_num = len(valves_list)
-    non_zero_flow_valves = OrderedDict({valve[0]: valve[1] for valve in valves.items() if valves[valve[0]].flow_rate > 0})
-    print(f"{non_zero_flow_valves=}")
+
     distances_dict = compute_distances(valves)
 
     state = Flow_State(distances_dict=distances_dict)
