@@ -8,6 +8,24 @@ import functools as ft
 import itertools
 from dataclasses import dataclass, field
 from typing import Union, OrderedDict
+import cython
+import time
+from functools import wraps
+
+
+def timer(func):
+
+    @wraps(wrapped=func)
+    def wrapped(*args, **kwargs):
+        start_time = time.perf_counter()
+        ret = func(*args, **kwargs)
+        end_time = time.perf_counter()
+        duration = end_time - start_time
+
+        print(f"{func.__name__=}; {duration=}")
+
+        return ret
+    return wrapped
 
 
 def load_files() -> list[list[str]]:
@@ -18,7 +36,7 @@ def load_files() -> list[list[str]]:
         for (lineIndex, line) in enumerate(f):  #loading the file into an np.array
             if bool(line) and line != "\n":
 
-                fContent.append(line.strip("\n").replace(",", "").replace(";", "").replace("Valve ", "").replace("has flow rate=", "").replace("tunnels lead to valves ", "").split())
+                fContent.append(line.strip("\n").replace(",", "").replace(";", "").replace("Valve ", "").replace("has flow rate=", "").replace("tunnels lead to valves ", "").replace("tunnel leads to valve ", "").split())
     print(f"{fContent[:5]=}")
     return fContent
 
@@ -42,7 +60,7 @@ class Flow_State:
         pass
 
 
-def load_valves(prep_list: list[list[str]]) -> dict[str, Valve]:
+def load_valves(prep_list: list[list[str]], *args, **kwargs) -> dict[str, Valve]:
     valves: dict[str, Valve] = OrderedDict()
     for element in prep_list:
         valves[element[0]] = Valve(int(element[1]), state=False, paths=element[2:])
@@ -52,7 +70,8 @@ def load_valves(prep_list: list[list[str]]) -> dict[str, Valve]:
     return valves
 
 
-def pair_distance(valves: dict[str, Valve], start_valve_name: str, end_valve_name: str) -> int:
+# @timer
+def pair_distance(valves: dict[str, Valve], start_valve_name: str, end_valve_name: str, *args, **kwargs) -> int:
     distance = 1
     next_valves: list[str] = valves[start_valve_name].paths
 
@@ -69,7 +88,9 @@ def pair_distance(valves: dict[str, Valve], start_valve_name: str, end_valve_nam
     return distance
 
 
-def compute_distances(valves: dict[str, Valve]) -> dict[str, int]:
+# @cython.locals(n=cython.int)
+@timer
+def compute_distances(valves: dict[str, Valve], *args, **kwargs) -> dict[str, int]:
 
     distances_dict: dict[str, int] = {}
     last_valve = list(valves.keys())[-1]
@@ -85,6 +106,9 @@ def compute_distances(valves: dict[str, Valve]) -> dict[str, int]:
             distance = pair_distance(valves, start_valve_name, end_valve_name)
             distances_dict[f"{start_valve_name}:{end_valve_name}"] = distance
 
+    print(list(distances_dict.items()))
+    print(f"{len(list(distances_dict.items()))=}")
+    print(f"{len(list(valves.items()))=}")
     return distances_dict
 
 
@@ -93,6 +117,10 @@ def compute_distances(valves: dict[str, Valve]) -> dict[str, int]:
 def main() -> None:
     prep_list = load_files()
     valves = load_valves(prep_list=prep_list)
+
+    valves_list = list(valves.items())
+    valves_num = len(valves_list)
+
     non_zero_flow_valves = [valve[0] for valve in valves.items() if valves[valve[0]].flow_rate > 0]
     print(f"{non_zero_flow_valves=}")
     distances_dict = compute_distances(valves)
