@@ -55,9 +55,13 @@ class Flow_State:
     total_flow: int = 0
     summed_flow: int = 0
     time_elapsed: int = 0
+    distances_dict: dict[str, int] = field(default_factory=dict)
 
     def update_state(self):
-        pass
+        return NotImplementedError
+
+    def compute_total_maximum(self) -> Union[int, type]:
+        return NotImplementedError
 
 
 def load_valves(prep_list: list[list[str]], *args, **kwargs) -> dict[str, Valve]:
@@ -133,7 +137,7 @@ def main() -> None:
     print(f"{non_zero_flow_valves=}")
     distances_dict = compute_distances(valves)
 
-    state = Flow_State()
+    state = Flow_State(distances_dict=distances_dict)
 
 
 
