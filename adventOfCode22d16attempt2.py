@@ -62,6 +62,10 @@ class Flow_State:
     time_available: int = 30
 
     def update_state(self):
+        if self.current_valve == "AA":
+            non_zero_flow_valves: list[Valve] = [valve for valve in self.valves if getattr(valve, "flow_rate") > 0]
+            self.time_available -= len(non_zero_flow_valves)
+
         return NotImplementedError
 
     def compute_total_maximum(self) -> Union[int, type]:
