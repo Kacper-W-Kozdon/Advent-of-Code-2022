@@ -74,10 +74,17 @@ def load_valves(prep_list: list[list[str]], *args, **kwargs) -> dict[str, Valve]
 def pair_distance(valves: dict[str, Valve], start_valve_name: str, end_valve_name: str, *args, **kwargs) -> int:
     distance = 1
     next_valves: list[str] = valves[start_valve_name].paths
+    valves_visited: list[str] = []
 
     while end_valve_name not in next_valves:
         distance += 1
         temp_valves = next_valves.copy()
+
+        for valve in next_valves:
+            if valve in valves_visited:
+                next_valves.pop(next_valves.index(valve))
+            else:
+                valves_visited.append(valve)
 
         for _ in next_valves:
             checking_valve = temp_valves.pop(0)
