@@ -44,8 +44,8 @@ def load_files() -> list[list[str]]:
 @dataclass(unsafe_hash=True)
 class Valve:
     flow_rate: int
-    state: bool
     paths: list[str]
+    time_turned_on: int = -1
 
 
 @dataclass
@@ -63,7 +63,7 @@ class Flow_State:
 def load_valves(prep_list: list[list[str]], *args, **kwargs) -> dict[str, Valve]:
     valves: dict[str, Valve] = OrderedDict()
     for element in prep_list:
-        valves[element[0]] = Valve(int(element[1]), state=False, paths=element[2:])
+        valves[element[0]] = Valve(int(element[1]), paths=element[2:])
 
     print(f"{list(valves.keys())[:5]=}")
 
@@ -84,7 +84,7 @@ def pair_distance(valves: dict[str, Valve], start_valve_name: str, end_valve_nam
                 next_valves.pop(next_valves.index(valve))
             else:
                 valves_visited.append(valve)
-                
+
         temp_valves = next_valves.copy()
 
         for _ in next_valves:
