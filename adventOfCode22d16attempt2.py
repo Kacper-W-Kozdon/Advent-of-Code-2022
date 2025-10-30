@@ -57,9 +57,9 @@ def load_files() -> list[list[str]]:
 class Valve:
     name: str
     flow_rate: int
-    paths: list[str] | OrderedDict[str, int]
+    paths: list[str]
     time_turned_on: int = -1
-    graph: OrderedDict[str, int] = field(default_factory=OrderedDict)
+    graph: OrderedDict[str, dict[str, list[int]]] = field(default_factory=OrderedDict)
 
 
 def compute_test_value(total_flow: int, time_remaining: int, flow_valves: list[Valve], path: list[Valve]) -> Union[dict[str, int], None]:
@@ -72,28 +72,53 @@ def compute_test_value(total_flow: int, time_remaining: int, flow_valves: list[V
 
 
     return NotImplementedError
+    
 
 
 @dataclass
 class Flow_State:
     current_valve: str = "AA"
-    paths_taken: list = field(default_factory=list)
+    visited_valves: list = field(default_factory=list)
     total_flow: int = 0
-    time_elapsed: int = 0
     distances_dict: dict[str, int] = field(default_factory=dict)
     flow_valves: list = field(default_factory=list)
     valves: dict = field(default_factory=dict)
     time_available: int = 30
     non_zero_flow_valves: list = field(default_factory=list)
+    cache: list[str] = field(default_factory=list)
 
     def update_state(self):
         if self.current_valve == "AA":
             self.non_zero_flow_valves = [valve for valve in self.valves if getattr(valve, "flow_rate") > 0]
             self.distances_dict = compute_distances(self.valves)
-
         
 
         return NotImplementedError
+
+
+
+def eval_path(path: list[str], valves: dict[str, Valve], flow_state: Flow_State) -> Union[int, None]:
+    total_flow: int = 0
+    time_elapsed = 0
+    turning_on_time = 1
+
+    for valve in path:
+        next_valve_index = path.index(valve) + 1
+        if next_valve_index == len(path):
+            break
+
+        next_valve = path[next_valve_index]
+
+        time_elapsed += valves[valve].graph["distances"][next_valve] + turning_on_time
+        time_remaining = flow_state.time_available - time_elapsed
+        if time_remaining < 0:
+            break
+
+        total_flow += time_remaining * valves[valve].flow_rate
+
+
+
+    return total_flow
 
 
 def load_valves(prep_list: list[list[str]], *args, **kwargs) -> dict[str, Valve]:
@@ -108,12 +133,13 @@ def load_valves(prep_list: list[list[str]], *args, **kwargs) -> dict[str, Valve]
 
 def graph_valves(valves: dict[str, Valve]) -> None:
     non_zero_flow_valves: OrderedDict[str, Valve] = OrderedDict([valve for valve in valves.items() if getattr(valve[1], "flow_rate") > 0])
+    num_flow_valves = len(non_zero_flow_valves)
     distances_dict = compute_distances(valves)
     for valve in non_zero_flow_valves.values():
-        graph = OrderedDict({path: distances_dict[f"{valve.name}:{path}"] for path in non_zero_flow_valves.keys() if path != valve.name})
+        graph = OrderedDict({path: {"distance": distances_dict[f"{valve.name}:{path}"], "weights": [1 for _ in range(num_flow_valves)]} for path in non_zero_flow_valves.keys() if path != valve.name})
         setattr(valve, "graph", graph)
 
-    print(f"{list(non_zero_flow_valves.values())[:5]=}")
+    print(f"{list(non_zero_flow_valves.values())[0]=}")
 
 
 # @timer
