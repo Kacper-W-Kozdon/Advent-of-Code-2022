@@ -13,6 +13,18 @@ import time
 from functools import wraps
 
 
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+
 def timer(func):
 
     @wraps(wrapped=func)
@@ -45,15 +57,17 @@ def load_files() -> list[list[str]]:
 class Valve:
     name: str
     flow_rate: int
-    paths: list[str]
+    paths: list[str] | OrderedDict[str, int]
     time_turned_on: int = -1
+    graph: OrderedDict[str, int] = field(default_factory=OrderedDict)
 
 
-def compute_test_value(total_flow: int, time_remaining: int, flow_valves: list[Valve], path: list[Valve], total_flow: int) -> Union[dict[str, int], None]:
+def compute_test_value(total_flow: int, time_remaining: int, flow_valves: list[Valve], path: list[Valve]) -> Union[dict[str, int], None]:
     
     available_valves = [valve for valve in flow_valves if valve not in path]
     
     for test_valve in available_valves:
+
         test_value = (time_remaining - 1) * (total_flow + test_valve.flow_rate)
 
 
@@ -90,6 +104,16 @@ def load_valves(prep_list: list[list[str]], *args, **kwargs) -> dict[str, Valve]
     print(f"{list(valves.keys())[:5]=}")
 
     return valves
+
+
+def graph_valves(valves: dict[str, Valve]) -> None:
+    non_zero_flow_valves: OrderedDict[str, Valve] = OrderedDict([valve for valve in valves.items() if getattr(valve[1], "flow_rate") > 0])
+    distances_dict = compute_distances(valves)
+    for valve in non_zero_flow_valves.values():
+        graph = OrderedDict({path: distances_dict[f"{valve.name}:{path}"] for path in non_zero_flow_valves.keys() if path != valve.name})
+        setattr(valve, "graph", graph)
+
+    print(f"{list(non_zero_flow_valves.values())[:5]=}")
 
 
 # @timer
@@ -147,6 +171,7 @@ def compute_distances(valves: dict[str, Valve], *args, **kwargs) -> dict[str, in
 def main() -> None:
     prep_list = load_files()
     valves = load_valves(prep_list=prep_list)
+    graph_valves(valves)
 
     valves_list = list(valves.items())
     valves_num = len(valves_list)
